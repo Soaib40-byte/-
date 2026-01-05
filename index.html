@@ -8,42 +8,22 @@
 <body>
 
 <h3 id="status">Loading...</h3>
-<!DOCTYPE html>
-<html>
-<body>
 
-<button onclick="go('freefire')">Free Fire</button>
-<button onclick="go('bloodstrike')">Blood Strike</button>
-
-<script>
-if (!localStorage.getItem("user_id")) {
-  location.href = "index.html";
-}
-
-function go(game) {
-  localStorage.setItem("game", game);
-  location.href = "mode.html";
-}
-</script>
-
-</body>
-</html>
 <script>
   const tg = window.Telegram.WebApp;
   tg.ready();
+  tg.expand();
 
   const user = tg.initDataUnsafe.user;
 
   if (!user) {
-    document.getElementById("status").innerText = "Telegram user not found!";
+    document.getElementById("status").innerText =
+      "Open from Telegram menu button";
   } else {
-    // Save user data (Auto Login)
     localStorage.setItem("user_id", user.id);
-    localStorage.setItem("user_name", user.first_name);
-    localStorage.setItem("username", user.username ?? "");
+    localStorage.setItem("user_name", user.first_name || "");
 
-    // Redirect to Home
-    window.location.href = "home.html";
+    location.href = "home.html";
   }
 </script>
 
