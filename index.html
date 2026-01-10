@@ -259,7 +259,7 @@
     let balance = 0;
     let joined = false;
     let mCount = 0;
-
+let userId = localStorage.getItem("uid"); if (!userId) {     userId = "uid_" + Date.now();     localStorage.setItem("uid", userId); }
 
 
     function login() {
@@ -271,6 +271,11 @@
         if(localStorage.getItem('loggedIn')) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-ui').classList.remove('hidden');
+            db.ref("users/" + userId + "/balance").once("value", snap => {
+    if (snap.val() === null) {
+        db.ref("users/" + userId + "/balance").set(0);
+    }
+});
             db.ref("users/" + userId + "/balance").on("value", snapshot => {
     balance = snapshot.val() || 0;
     updateUI();
@@ -316,7 +321,6 @@
 
     function showAddMoney() { document.getElementById('add-money-list').classList.remove('hidden'); }
 
-    const userId = "user_001"; // ডেমো ইউজার
 
 function payVia(method) {
 
@@ -418,6 +422,8 @@ function payVia(method) {
                 return;
             }
             balance -= 1;
+db.ref("users/" + userId + "/balance").set(balance);
+updateUI();
             updateUI();
             let btn = document.getElementById('join-btn');
             btn.innerText = "Requesting...";
