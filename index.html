@@ -278,9 +278,17 @@ let userId = localStorage.getItem("uid"); if (!userId) {     userId = "uid_" + D
 });
             db.ref("users/" + userId + "/balance").on("value", snapshot => {
     balance = snapshot.val() || 0;
-    updateUI();
+
 });
 
+
+db.ref("users/" + userId + "/matches").on("value", function(snapshot){
+    mCount = snapshot.val() || 0;
+    updateUI();
+});
+db.ref("users/" + userId + "/joined").once("value", function(snap){
+    joined = snap.val() || false;
+});
             startTimer();
             updateUI();
         }
@@ -417,31 +425,42 @@ function payVia(method) {
     function handleJoin() {
         if(joined) return;
         openModal("Join Match", "আপনার Free Fire ID নাম দিন:", "PlayerName", (ign) => {
-            if(balance < 1) {
-                alert("পর্যাপ্ত ব্যালেন্স নেই! দয়া করে টাকা অ্যাড করুন।");
-                return;
-            }
-            balance -= 1;
+if (balance < 1) {
+  alert("পর্যাপ্ত ব্যালেন্স নেই");
+  return;
+}
+
+/* 1️⃣ match fee cut */
+balance = balance - 1;
 db.ref("users/" + userId + "/balance").set(balance);
+
+/* 2️⃣ match count increase */
+mCount = mCount + 1;
+db.ref("users/" + userId + "/matches").set(mCount);
+joined = true;
+db.ref("users/" + userId + "/joined").set(true);
+/* 4️⃣ UI update */
 updateUI();
-            updateUI();
-            let btn = document.getElementById('join-btn');
-            btn.innerText = "Requesting...";
-            btn.disabled = true;
-            setTimeout(() => {
-                joined = true; mCount++;
-                btn.innerText = "Joined ✅";
-                btn.className = "btn-action btn-joined";
-                updateUI();
-            }, 3000);
-        });
+
+var btn = document.getElementById("join-btn");
+btn.innerText = "Joined ✅";
+btn.disabled = true;
+btn.className = "btn-action btn-joined";
+});
     }
 
     function updateUI() {
-        document.getElementById('current-balance').innerText = balance;
-        document.getElementById('top-balance').innerText = "৳ " + balance;
-        document.getElementById('matches-count').innerText = mCount;
+    document.getElementById('current-balance').innerText = balance;
+    document.getElementById('top-balance').innerText = "৳ " + balance;
+    document.getElementById('matches-count').innerText = mCount;
+
+    var btn = document.getElementById('join-btn');
+    if (btn && joined) {
+        btn.innerText = "Joined ✅";
+        btn.className = "btn-action btn-joined";
+        btn.disabled = true;
     }
+}
 
     function startTimer() {
         let time = 7200; 
