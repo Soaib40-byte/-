@@ -185,70 +185,67 @@
             <div class="match-info">Coming Soon...</div>
         </div>
     </div>
+<!-- FREE FIRE SECTION -->
+<div id="ff-sec" class="container hidden">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <i class="fas fa-chevron-left" onclick="showHome()"></i>
+        <h3>BR - Solo Matches</h3>
+    </div>
 
-    <div id="ff-sec" class="container hidden">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px;">
-            <i class="fas fa-chevron-left" onclick="showHome()"></i>
-            <h3>BR - Solo Matches</h3>
-        </div>
-        <div class="match-card">
-            <div class="match-body glass-card">
-                <div id="timer" class="timer-red">Calculating...</div>
-                <h3 style="margin: 10px 0;">BR SOLO - CLASSIC</h3>
-                <div class="match-details">
-                    <span><i class="fas fa-coins"></i> Entry: 1 BDT</span>
-                    <span><i class="fas fa-trophy"></i> Prize: 40 BDT</span>
-                    <span><i class="fas fa-map-marker-alt"></i> Bermuda</span>
-                    <span><i class="fas fa-user-friends"></i> 48 Players</span>
-                </div>
-                <div class="match-extra-buttons">
-    <button class="extra-btn details-btn">
-        <i class="fas fa-info-circle"></i> Match Details
-    </button>
-
-    <button class="extra-btn players-btn">
-        <i class="fas fa-users"></i> Players List
-    </button>
+    <div id="matchContainer"></div>
 </div>
-            </div>
-            <button id="join-btn" class="btn-action btn-join" onclick="handleJoin()">Join Match</button>
+
+<!-- PROFILE SECTION -->
+<div id="profile-sec" class="container hidden">
+    <div class="glass-card" style="text-align:center;">
+        <img src="https://ui-avatars.com/api/?name=User&background=00d2ff&color=fff"
+             style="width:80px;border-radius:50%;border:3px solid var(--primary);">
+        <h2 id="u-name">Player One</h2>
+        <p>@telegram_user</p>
+    </div>
+
+    <div style="display:flex;gap:15px;">
+        <div class="glass-card" style="flex:1;text-align:center;">
+            <p style="margin:0;font-size:0.9em;opacity:0.8;">Matches</p>
+            <h3 id="matches-count" style="margin:5px 0 0 0;">0</h3>
+        </div>
+        <div class="glass-card" style="flex:1;text-align:center;">
+            <p style="margin:0;font-size:0.9em;opacity:0.8;">Earnings</p>
+            <h3 style="margin:5px 0 0 0;">৳ 0</h3>
+        </div>
+    </div>
+</div>
+
+<!-- WALLET SECTION -->
+<div id="wallet-sec" class="container hidden">
+    <div class="glass-card" style="text-align:center;">
+        <h3>My Wallet</h3>
+        <div class="wallet-balance">৳ <span id="current-balance">0</span></div>
+
+        <div style="display:flex;gap:10px;">
+            <button class="telegram-btn" style="flex:1;background:#2196f3;"
+                    onclick="showAddMoney()">
+                <i class="fas fa-plus"></i> Add Money
+            </button>
+            <button class="telegram-btn" style="flex:1;background:#4caf50;"
+                    onclick="handleWithdraw()">
+                <i class="fas fa-university"></i> Withdraw
+            </button>
         </div>
     </div>
 
-    <div id="profile-sec" class="container hidden">
-        <div class="glass-card" style="text-align:center;">
-            <img src="https://ui-avatars.com/api/?name=User&background=00d2ff&color=fff" style="width:80px; border-radius:50%; border:3px solid var(--primary);">
-            <h2 id="u-name">Player One</h2>
-            <p>@telegram_user</p>
+    <div id="add-money-list" class="hidden">
+        <h4>Select Method</h4>
+        <div class="glass-card"
+             onclick="payVia('Bkash')"
+             style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+            <span>Bkash Payment</span>
+            <i class="fas fa-chevron-right"></i>
         </div>
-        <div style="display: flex; gap: 15px;">
-            <div class="glass-card" style="flex:1; text-align:center;">
-                <p style="margin:0; font-size:0.9em; opacity:0.8;">Matches</p>
-                <h3 id="matches-count" style="margin:5px 0 0 0;">0</h3>
-            </div>
-            <div class="glass-card" style="flex:1; text-align:center;">
-                <p style="margin:0; font-size:0.9em; opacity:0.8;">Earnings</p>
-                <h3 style="margin:5px 0 0 0;">৳ 0</h3>
-            </div>
-        </div>
+        <div class="glass-card" style="opacity:0.5;">Nagad (Coming Soon)</div>
     </div>
+</div>
 
-    <div id="wallet-sec" class="container hidden">
-        <div class="glass-card" style="text-align:center;">
-            <h3>My Wallet</h3>
-            <div class="wallet-balance">৳ <span id="current-balance">0</span></div>
-            <div style="display:flex; gap:10px;">
-                <button class="telegram-btn" style="flex:1; background:#2196f3;" onclick="showAddMoney()"><i class="fas fa-plus"></i> Add Money</button>
-                <button class="telegram-btn" style="flex:1; background:#4caf50;" onclick="handleWithdraw()"><i class="fas fa-university"></i> Withdraw</button>
-            </div>
-        </div>
-
-        <div id="add-money-list" class="hidden">
-            <h4>Select Method</h4>
-            <div class="glass-card" onclick="payVia('Bkash')" style="display:flex; justify-content: space-between; align-items: center; cursor:pointer;">
-                <span>Bkash Payment</span>
-                <i class="fas fa-chevron-right"></i>
-            </div>
             <div class="glass-card" style="opacity: 0.5;">Nagad (Coming Soon)</div>
         </div>
     </div>
@@ -325,7 +322,7 @@ db.ref("users/" + userId + "/matches").on("value", function(snapshot){
 db.ref("users/" + userId + "/joined").once("value", function(snap){
     joined = snap.val() || false;
 });
-            startTimer();
+            
             updateUI();
         }
     }
@@ -409,107 +406,120 @@ function payVia(method) {
         }
     );
 }
+function handleJoin(matchId, entryFee) {
 
-    function handleWithdraw() {
-
-    // STEP 1: Ask Amount
     openModal(
-        "Withdraw",
-        "আপনি কত টাকা Withdraw করতে চান? (Minimum 50)",
-        "50",
-        (amountInput) => {
+        "Join Match",
+        "আপনার Free Fire ID দিন",
+        "PlayerName",
+        (ign) => {
 
-            const amount = parseInt(amountInput);
-
-            if (!amount || amount < 50) {
-                alert("❌ Minimum Withdraw 50 টাকা");
-                return;
-            }
-
-            if (amount > balance) {
-                alert("❌ পর্যাপ্ত ব্যালেন্স নেই");
+            if (!ign || ign.trim() === "") {
+                alert("❌ নাম/ID দিতে হবে");
                 return;
             }
 
             closeModal();
 
-            // STEP 2: Ask Number
-            setTimeout(() => {
-                openModal(
-                    "Withdraw",
-                    `Bkash নাম্বার দিন (Amount: ${amount} টাকা)`,
-                    "01XXXXXXXXX",
-                    (number) => {
+            if (balance < entryFee) {
+                alert("❌ পর্যাপ্ত ব্যালেন্স নেই");
+                return;
+            }
 
-                        db.ref("withdrawRequests").push({
-                            userId: userId,
-                            amount: amount,
-                            method: "Bkash",
-                            number: number,
-                            status: "pending",
-                            time: Date.now()
-                        });
+            // 🔒 single & correct check
+            db.ref("users/" + userId + "/joinedMatches/" + matchId)
+              .once("value", snap => {
 
-                        alert("✅ Withdraw request Admin এর কাছে পাঠানো হয়েছে");
-                    }
-                );
-            }, 300);
+                  if (snap.exists()) {
+                      alert("⚠️ আপনি ইতিমধ্যে এই ম্যাচে Join করেছেন");
+                      return;
+                  }
+
+                  // ✅ balance cut
+                  db.ref("users/" + userId + "/balance")
+                    .set(balance - entryFee);
+
+                  // ✅ save join
+                  db.ref("users/" + userId + "/joinedMatches/" + matchId)
+                    .set({
+                        ign: ign,
+                        time: Date.now()
+                    });
+db.ref("users/" + userId + "/matches")
+  .transaction(count => (count || 0) + 1);
+                  updateUI();
+
+                  const btn = document.getElementById("join-btn-" + matchId);
+                  if (btn) {
+                      btn.innerText = "JOINED ✅";
+                      btn.disabled = true;
+                      btn.className = "btn-action btn-joined";
+                  }
+              });
         }
     );
 }
-
-    function handleJoin() {
-        if(joined) return;
-        openModal("Join Match", "আপনার Free Fire ID নাম দিন:", "PlayerName", (ign) => {
-if (balance < 1) {
-  alert("পর্যাপ্ত ব্যালেন্স নেই");
-  return;
-}
-
-/* 1️⃣ match fee cut */
-balance = balance - 1;
-db.ref("users/" + userId + "/balance").set(balance);
-
-/* 2️⃣ match count increase */
-mCount = mCount + 1;
-db.ref("users/" + userId + "/matches").set(mCount);
-joined = true;
-db.ref("users/" + userId + "/joined").set(true);
-/* 4️⃣ UI update */
-updateUI();
-
-var btn = document.getElementById("join-btn");
-btn.innerText = "Joined ✅";
-btn.disabled = true;
-btn.className = "btn-action btn-joined";
-});
-    }
-
+    
     function updateUI() {
     document.getElementById('current-balance').innerText = balance;
     document.getElementById('top-balance').innerText = "৳ " + balance;
     document.getElementById('matches-count').innerText = mCount;
-
-    var btn = document.getElementById('join-btn');
-    if (btn && joined) {
-        btn.innerText = "Joined ✅";
-        btn.className = "btn-action btn-joined";
-        btn.disabled = true;
-    }
 }
 
-    function startTimer() {
-        let time = 7200; 
-        setInterval(() => {
-            let h = Math.floor(time / 3600);
-            let m = Math.floor((time % 3600) / 60);
-            let s = time % 60;
-            document.getElementById('timer').innerText = `Starts In: ${h}h ${m}m ${s}s`;
-            if(time > 0) time--;
-        }, 1000);
-    }
+// Firebase থেকে ম্যাচগুলো নিয়ে আসা এবং UI-তে দেখানো
+db.ref('matches').on('value', (snap) => {
+    const container = document.getElementById('matchContainer');
+    container.innerHTML = ''; // আগের ডাটা ক্লিয়ার করা
 
+    snap.forEach((child) => {
+        const m = child.val();
+        const mId = child.key;
+
+        // শুধুমাত্র Free Fire গেমের ম্যাচগুলো দেখাবে
+        if (m.game === "Free Fire") {
+            const card = document.createElement('div');
+            card.className = 'match-card glass-card';
+            
+            card.innerHTML = `
+                <div class="match-banner">${m.title}</div>
+                <div class="match-info">
+                    <div class="match-details">
+                        <span><i class="fas fa-money-bill"></i> Entry: ৳${m.entryFee}</span>
+                        <span><i class="fas fa-trophy"></i> Prize: ৳${m.prize}</span>
+                        <span><i class="fas fa-gamepad"></i> Mode: ${m.type}</span>
+                        <span><i class="fas fa-clock"></i> ${m.time}</span>
+                    </div>
+                    <div class="match-extra-buttons">
+                        <button class="extra-btn"><i class="fas fa-info-circle"></i> Details</button>
+                        <button class="extra-btn"><i class="fas fa-list"></i> Players</button>
+                    </div>
+                </div>
+                <button id="join-btn-${mId}" 
+                    class="btn-action btn-join" 
+                    onclick="handleJoin('${mId}', ${m.entryFee})">
+                    JOIN NOW
+                </button>
+            `;
+            container.appendChild(card);
+
+            // ইউজার কি ইতিমধ্যে জয়েন করেছে কিনা চেক করা
+            db.ref("users/" + userId + "/joinedMatches/" + mId).once("value", (jSnap) => {
+                if (jSnap.exists()) {
+                    const btn = document.getElementById("join-btn-" + mId);
+                    if (btn) {
+                        btn.innerText = "JOINED ✅";
+                        btn.disabled = true;
+                        btn.className = "btn-action btn-joined";
+                    }
+                }
+            });
+        }
+    });
+});
+
+    
     window.onload = checkAuth;
+
 </script>
 </body>
 </html>
