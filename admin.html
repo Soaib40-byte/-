@@ -139,17 +139,37 @@ db.ref('withdrawRequests').on('value', function(snap){
         "<div class='row'><b>Amount:</b>৳" + d.amount + "</div>" +
         "<div class='row'><span class='status " + d.status + "'>" + d.status + "</span></div>" +
         "<div class='actions'>" +
-          "<button class='approve' onclick=\"approveWithdraw('" + d._key + "','" + d.userId + "'," + d.amount + ")\">Approve</button>" +
+"<button class='approve' " +
+(d.status !== 'pending' ? "disabled " : "") +
+"onclick=\"approveWithdraw('" + d._key + "','" + d.userId + "'," + d.amount + ")\">Approve</button>" +
           "<button class='reject' onclick=\"rejectWithdraw('" + d._key + "')\">Reject</button>" +
         "</div>" +
       "</div>";
   }
 
 });
-  function approveWithdraw(id,uid,amt){
-    db.ref('withdrawRequests/'+id).update({status:'approved'});
-    db.ref('users/'+uid+'/balance').transaction(b=>(b||0)-amt);
-  }
+  function approveWithdraw(id, uid, amt){
+  const reqRef = db.ref("withdrawRequests/" + id);
+
+  reqRef.once("value").then(function(snapshot){
+    const data = snapshot.val();
+    if(!data) return;
+
+    // শুধু pending থাকলেই approve
+    if(data.status !== "pending") return;
+
+    // status update
+    reqRef.update({
+      status: "approved"
+    });
+
+    // balance cut (একবারই)
+    db.ref("users/" + uid + "/balance")
+      .transaction(function(balance){
+        return (balance || 0) - Number(amt);
+      });
+  });
+}
   function rejectWithdraw(id){
   var reqRef = db.ref("withdrawRequests/" + id);
 
