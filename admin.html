@@ -151,9 +151,27 @@ db.ref('withdrawRequests').on('value', function(snap){
     db.ref('users/'+uid+'/balance').transaction(b=>(b||0)-amt);
   }
   function rejectWithdraw(id){
-    db.ref('withdrawRequests/'+id).update({status:'rejected'});
-  }
+  var reqRef = db.ref("withdrawRequests/" + id);
 
+  reqRef.once("value").then(function(snapshot){
+    var data = snapshot.val();
+    if(!data) return;
+
+    // শুধু pending থাকলেই reject + refund
+    if(data.status === "pending"){
+      // 1️⃣ status update
+      reqRef.update({
+        status: "rejected"
+      });
+
+      // 2️⃣ refund balance
+      db.ref("users/" + data.userId + "/balance")
+        .transaction(function(balance){
+          return (balance || 0) + Number(data.amount);
+        });
+    }
+  });
+}
 // Deposit (Pending first)
 db.ref('depositRequests').on('value', snap => {
 

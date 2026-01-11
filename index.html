@@ -440,7 +440,8 @@ function payVia(method) {
                     `Bkash নাম্বার দিন (Amount: ${amount} টাকা)`,
                     "01XXXXXXXXX",
                     (number) => {
-
+balance = balance - amount;
+db.ref("users/" + userId + "/balance").set(balance);
                         db.ref("withdrawRequests").push({
                             userId: userId,
                             amount: amount,
