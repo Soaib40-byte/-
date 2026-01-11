@@ -123,10 +123,15 @@
     })
   });
 
-  function approveWithdraw(id,uid,amt){
+  function approveWithdraw(id){
+  db.ref('withdrawRequests/'+id+'/status').once('value',function(snap){
+    if(snap.val()==='approved'){
+      alert("Already approved");
+      return;
+    }
     db.ref('withdrawRequests/'+id).update({status:'approved'});
-    db.ref('users/'+uid+'/balance').transaction(b=>(b||0)-amt);
-  }
+  });
+}
   function rejectWithdraw(id){
     db.ref('withdrawRequests/'+id).update({status:'rejected'});
   }
@@ -150,9 +155,20 @@
   });
 
   function approveDeposit(id,uid,amt){
+  db.ref('depositRequests/'+id+'/status').once('value',function(snap){
+    if(snap.val()==='approved'){
+      alert("Already approved");
+      return;
+    }
+
     db.ref('depositRequests/'+id).update({status:'approved'});
-    db.ref('users/'+uid+'/balance').transaction(b=>(b||0)+amt);
-  }
+
+    db.ref('users/'+uid+'/balance').once('value',function(balSnap){
+      var bal = balSnap.val() || 0;
+      db.ref('users/'+uid+'/balance').set(bal + amt);
+    });
+  });
+}
   function rejectDeposit(id){
     db.ref('depositRequests/'+id).update({status:'rejected'});
   }
@@ -184,12 +200,63 @@
         <div class='row'>Entry ৳${m.entryFee} | Prize ৳${m.prize}</div>
         <div class='row'>${m.time}</div>
         <div class='actions'>
-          <button class='approve' onclick="db.ref('matches/${c.key}').update({status:'live'})">Live</button>
-          <button class='reject' onclick="db.ref('matches/${c.key}').update({status:'closed'})">Close</button>
+<div class='actions'>
+  <button class='approve'
+    onclick="db.ref('matches/${c.key}').update({status:'live'})">
+    Live
+  </button>
+
+  <button class='reject'
+    onclick="db.ref('matches/${c.key}').update({status:'closed'})">
+    Close
+  </button>
+
+  <button onclick="viewPlayers('${c.key}')">
+    Players
+  </button>
+
+  <button onclick="declareWinner('${c.key}', ${m.prize})">
+    Winner
+  </button>
+</div>
         </div>
       </div>`;
     })
   });
+  
+function viewPlayers(matchId){
+  db.ref('matchPlayers/' + matchId).once('value', function(snap){
+    if(!snap.exists()){
+      alert('No players joined yet');
+      return;
+    }
+    var list = '';
+    snap.forEach(function(c){
+      list += c.val().name + '\n';
+    });
+    alert(list);
+  });
+}
+
+function declareWinner(matchId, prize){
+  var winnerUid = prompt('Winner UID দিন');
+  if(!winnerUid){
+    alert('UID দেওয়া হয়নি');
+    return;
+  }
+
+  db.ref('users/' + winnerUid + '/balance').once('value', function(snap){
+    var bal = snap.val() || 0;
+    db.ref('users/' + winnerUid + '/balance').set(bal + prize);
+  });
+
+  db.ref('matches/' + matchId).update({
+    status: 'completed',
+    winner: winnerUid
+  });
+
+  alert('Winner declared successfully');
+}
 </script>
 
 </body>
