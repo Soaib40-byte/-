@@ -36,7 +36,6 @@
         .nav-item i { font-size: 18px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
         
-        /* New Styles for Player List */
         .player-row { border-bottom: 1px solid #eee; padding: 10px 0; }
         .winner-input-group { display: flex; gap: 5px; margin-top: 5px; }
         .winner-input-group input { padding: 5px; margin: 0; }
@@ -58,6 +57,7 @@
             </select>
             <input id="mEntry" type="number" placeholder="Entry Fee">
             <input id="mPrize" type="number" placeholder="Total Prize">
+            <input id="mLimit" type="number" placeholder="Join Limit (e.g. 48)">
             <input id="mTime" placeholder="Time (30/01/26, 12:00AM)">
             <button class="btn btn-add" onclick="addMatch()">Publish Match</button>
         </div>
@@ -118,7 +118,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-    // Firebase Configuration (Keeping your existing config)
     const firebaseConfig = {
         apiKey: "AIzaSyDgBrES-3lWjeFVo6vz3jfMOyCl_tgy_RQ",
         authDomain: "tournament-hub-a936a.firebaseapp.com",
@@ -152,8 +151,6 @@
             loadWinners();
         }
     }
-
-    // --- Winner Management Logic ---
 
     function updateMatchDropdown() {
         const select = document.getElementById('matchSelect');
@@ -190,7 +187,7 @@
                                 <option value="2">2nd</option>
                                 <option value="3">3rd</option>
                             </select>
-                            <input type="number" id="prize-${child.key}" placeholder="Prize (৳)" style="flex:1">
+                            <input type="number" id="prize-${child.key}" placeholder="Prize" style="flex:1">
                             <button class="btn btn-approve" style="width:80px; margin:0" 
                                 onclick="setWinner('${matchId}', '${child.key}', '${p.userId}', '${p.gameName}')">Set</button>
                         </div>
@@ -202,7 +199,6 @@
     function setWinner(matchId, playerKey, userId, gameName) {
         const rank = document.getElementById(`rank-${playerKey}`).value;
         const amount = document.getElementById(`prize-${playerKey}`).value;
-
         if(!amount) return alert("Please enter prize amount");
 
         const winData = {
@@ -214,12 +210,9 @@
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
 
-        // 1. Add to winner history
         db.ref('winners').push(winData).then(() => {
-            // 2. Add balance to user
             db.ref(`users/${userId}/balance`).transaction(curr => (curr || 0) + Number(amount));
-            // 3. Optional: Remove from player list or mark as winner
-            alert(`Rank ${rank} Winner Updated! ৳${amount} added to user.`);
+            alert(`Rank ${rank} Winner Updated! Balance added.`);
         });
     }
 
@@ -238,8 +231,6 @@
             });
         });
     }
-
-    // --- Existing Functionalities (Deposit, Withdraw, Matches) ---
 
     let currentDepFilter = 'pending';
     let currentWithFilter = 'pending';
@@ -321,12 +312,14 @@
 
     function addMatch() {
         const title = document.getElementById('mTitle').value;
-        if(!title) return alert("Title please");
+        const limit = document.getElementById('mLimit').value;
+        if(!title || !limit) return alert("Title and Limit required");
         db.ref('matches').push({
             title: title, 
             type: document.getElementById('mMode').value,
             entryFee: document.getElementById('mEntry').value,
             prize: document.getElementById('mPrize').value,
+            limit: Number(limit), // Added Limit
             time: document.getElementById('mTime').value,
             game: "Free Fire",
             roomId: "Waiting...", 
@@ -345,7 +338,7 @@
         items.reverse().forEach(m => {
             list.innerHTML += `
                 <div class="card">
-                    <h3>${m.title} (${m.type})</h3>
+                    <h3>${m.title} (${m.limit} Players)</h3>
                     <div class="flex-btns">
                         <input id="ri-${m.key}" value="${m.roomId}" placeholder="Room ID">
                         <input id="rp-${m.key}" value="${m.roomPass}" placeholder="Pass">
@@ -364,7 +357,6 @@
         });
     }
 
-    // Initial Load
     loadDeposits();
     loadWithdrawals();
 </script>
