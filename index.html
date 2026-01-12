@@ -543,8 +543,8 @@ db.ref('matches').on('value', (snap) => {
                         <span><i class="fas fa-clock"></i> ${m.time}</span>
                     </div>
                     <div class="match-extra-buttons">
-                        <button class="extra-btn"><i class="fas fa-info-circle"></i> Details</button>
-                        <<button class="extra-btn" onclick="showPlayers('${mId}')"><i class="fas fa-list"></i> Players</button>
+<button class="extra-btn" onclick="showDetails('${mId}')"><i class="fas fa-info-circle"></i> Details</button>
+                        <button class="extra-btn" onclick="showPlayers('${mId}')"><i class="fas fa-list"></i> Players</button>
 
                     </div>
                 </div>
@@ -584,6 +584,20 @@ function showPlayers(matchId) {
             count++;
         });
         alert(playerList);
+    });
+}
+function showDetails(matchId) {
+    db.ref("matches/" + matchId).once("value", (snap) => {
+        const m = snap.val();
+        
+        // ইউজার এই ম্যাচে জয়েন করেছে কিনা চেক করা (নিরাপত্তার জন্য)
+        db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", (jSnap) => {
+            if (jSnap.exists()) {
+                alert(`Match Details:\n\nRoom ID: ${m.roomId}\nPassword: ${m.roomPass}`);
+            } else {
+                alert("⚠️ রুম আইডি দেখতে আগে ম্যাচে জয়েন করুন!");
+            }
+        });
     });
 }
 
