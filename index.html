@@ -134,7 +134,7 @@
         }
 
         .btn-join { background: linear-gradient(to right, #00d2ff, #3a7bd5); color: white; }
-        .btn-joined { background: #4b4b4b; color: #aaa; cursor: not-allowed; }
+        .btn-joined { background: #4b4b4b !important; color: #aaa !important; cursor: not-allowed; }
 
         .navbar {
             position: fixed; bottom: 15px; left: 15px; right: 15px;
@@ -304,25 +304,37 @@
         document.getElementById('matches-count').innerText = mCount;
     }
 
-    // Live Timer Function
-    function startLiveTimer(targetTime, elementId) {
+    // টাইম ফরম্যাট ফাংশন (AM/PM)
+    function formatTimeAMPM(timeStr) {
+        const date = new Date(timeStr);
+        return date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+    }
+
+    // লাইভ টাইমার এবং ম্যাচ ইন্ড লজিক
+    function startLiveTimer(targetTime, elementId, btnId) {
         const x = setInterval(function() {
             const now = new Date().getTime();
             const distance = new Date(targetTime).getTime() - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
             const display = document.getElementById(elementId);
+            const btn = document.getElementById(btnId);
+
             if (!display) { clearInterval(x); return; }
 
             if (distance < 0) {
                 clearInterval(x);
                 display.innerHTML = "MATCH STARTED";
+                display.style.color = "#ff4757";
+                if (btn && btn.innerText !== "JOINED ✅") {
+                    btn.innerText = "ENTRY CLOSED";
+                    btn.disabled = true;
+                    btn.classList.add('btn-joined');
+                }
             } else {
-                display.innerHTML = `<i class="fas fa-clock"></i> Format: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                display.innerHTML = `<i class="fas fa-clock"></i> Starts in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
             }
         }, 1000);
     }
@@ -337,11 +349,16 @@
             if (m.game === "Free Fire") {
                 const card = document.createElement('div');
                 card.className = 'match-card glass-card';
+                
+                // তারিখ এবং AM/PM সময় আলাদা করা
+                const datePart = m.time.split('T')[0];
+                const timePart = formatTimeAMPM(m.time);
+
                 card.innerHTML = `
                     <div class="match-banner">
                         <div class="banner-overlay">
                             ${m.title}<br>
-                            <small style="font-size:0.7em; color:#00d2ff;"><i class="fas fa-calendar-alt"></i> ${m.time.replace('T', ', ')}</small>
+                            <small style="font-size:0.7em; color:#00d2ff;"><i class="fas fa-calendar-alt"></i> ${datePart}, ${timePart}</small>
                         </div>
                     </div>
                     <div class="match-info">
@@ -349,7 +366,7 @@
                             <div class="info-item"><i class="fas fa-money-bill"></i> Entry: ৳${m.entryFee}</div>
                             <div class="info-item"><i class="fas fa-trophy"></i> Prize: ৳${m.prize}</div>
                             <div class="info-item"><i class="fas fa-gamepad"></i> Mode: ${m.type}</div>
-                            <div class="info-item" id="joined-count-${mId}"><i class="fas fa-users"></i> Joined: 0/${m.limit || 48}</div>
+                            <div class="info-item" id="joined-count-${mId}"><i class="fas fa-users"></i> Joined: .../${m.limit || 48}</div>
                         </div>
                         <div class="match-extra-buttons">
                             <button class="extra-btn" onclick="showDetails('${mId}')"><i class="fas fa-info-circle"></i> Details</button>
@@ -357,44 +374,66 @@
                         </div>
                         <div class="countdown-box" id="timer-${mId}">Calculating time...</div>
                     </div>
-                    <button id="join-btn-${mId}" class="btn-action btn-join" onclick="handleJoin('${mId}', ${m.entryFee})">JOIN NOW</button>
+                    <button id="join-btn-${mId}" class="btn-action btn-join" onclick="handleJoin('${mId}', ${m.entryFee}, ${m.limit || 48})">JOIN NOW</button>
                 `;
                 container.appendChild(card);
 
-                // Live Joined Count
+                // লাইভ প্লেয়ার কাউন্ট এবং লিমিট চেক
                 db.ref("matchPlayers/" + mId).on('value', pSnap => {
                     const count = pSnap.numChildren();
+                    const limit = m.limit || 48;
                     const el = document.getElementById(`joined-count-${mId}`);
-                    if(el) el.innerHTML = `<i class="fas fa-users"></i> Joined: ${count}/${m.limit || 48}`;
+                    const btn = document.getElementById(`join-btn-${mId}`);
+                    
+                    if(el) el.innerHTML = `<i class="fas fa-users"></i> Joined: ${count}/${limit}`;
+                    
+                    // লিমিট শেষ হলে বাটন লক
+                    if (count >= limit && btn && btn.innerText !== "JOINED ✅") {
+                        btn.innerText = "MATCH FULL";
+                        btn.disabled = true;
+                        btn.classList.add('btn-joined');
+                    }
                 });
 
-                // Start Timer
-                startLiveTimer(m.time, `timer-${mId}`);
+                // টাইমার শুরু
+                startLiveTimer(m.time, `timer-${mId}`, `join-btn-${mId}`);
 
-                // Check Joined Status
-                db.ref("users/" + userId + "/joinedMatches/" + mId).once("value", (jSnap) => {
+                // জয়েন্ড স্ট্যাটাস রিয়েলটাইম চেক
+                db.ref("users/" + userId + "/joinedMatches/" + mId).on("value", (jSnap) => {
                     if (jSnap.exists()) {
                         const btn = document.getElementById("join-btn-" + mId);
-                        if (btn) { btn.innerText = "JOINED ✅"; btn.disabled = true; btn.className = "btn-action btn-joined"; }
+                        if (btn) { 
+                            btn.innerText = "JOINED ✅"; 
+                            btn.disabled = true; 
+                            btn.className = "btn-action btn-joined"; 
+                        }
                     }
                 });
             }
         });
     });
 
-    function handleJoin(matchId, entryFee) {
-        openModal("Join Match", "আপনার Free Fire ID দিন", "PlayerName", (ign) => {
-            if (!ign) return;
-            if (balance < entryFee) { alert("❌ পর্যাপ্ত ব্যালেন্স নেই"); return; }
+    function handleJoin(matchId, entryFee, limit) {
+        // জয়েন করার আগে সিট খালি আছে কিনা আবার চেক
+        db.ref("matchPlayers/" + matchId).once("value", pSnap => {
+            if (pSnap.numChildren() >= limit) {
+                alert("❌ দুঃখিত, ম্যাচটি ফুল হয়ে গেছে!");
+                return;
+            }
 
-            db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", snap => {
-                if (snap.exists()) { alert("⚠️ আপনি ইতিমধ্যে Join করেছেন"); return; }
+            openModal("Join Match", "আপনার Free Fire ID দিন", "PlayerName", (ign) => {
+                if (!ign) return;
+                if (balance < entryFee) { alert("❌ পর্যাপ্ত ব্যালেন্স নেই"); return; }
 
-                db.ref("users/" + userId + "/balance").set(balance - entryFee);
-                db.ref("users/" + userId + "/joinedMatches/" + matchId).set({ ign: ign, time: Date.now() });
-                db.ref("matchPlayers/" + matchId + "/" + userId).set({ gameName: ign, userId: userId });
-                db.ref("users/" + userId + "/matches").transaction(c => (c || 0) + 1);
-                alert("✅ Successfully Joined!");
+                db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", snap => {
+                    if (snap.exists()) { alert("⚠️ আপনি ইতিমধ্যে Join করেছেন"); return; }
+
+                    db.ref("users/" + userId + "/balance").set(balance - entryFee);
+                    db.ref("users/" + userId + "/joinedMatches/" + matchId).set({ ign: ign, time: Date.now() });
+                    db.ref("matchPlayers/" + matchId + "/" + userId).set({ gameName: ign, userId: userId });
+                    db.ref("users/" + userId + "/matches").transaction(c => (c || 0) + 1);
+                    alert("✅ Successfully Joined!");
+                });
             });
         });
     }
@@ -421,9 +460,9 @@
     function showAddMoney() { document.getElementById('add-money-list').classList.remove('hidden'); }
     
     function payVia(method) {
-        openModal("Add Money", "কত টাকা পাঠিয়েছেন?", "50", (amt) => {
+        openModal("Add Money", "কত টাকা পাঠাতে চান", "50", (amt) => {
             setTimeout(() => {
-                openModal("Transaction ID", method + " Transaction ID দিন", "TRX123", (tid) => {
+                openModal("Transaction ID", method + " 01989118735 BEKASH এ টাকাপাঠিয়েTranjection ID দিন", "TRX123", (tid) => {
                     db.ref("depositRequests").push({ userId: userId, method: method, amount: amt, transactionId: tid, status: "pending", time: Date.now() });
                     alert("✅ Request Sent!");
                 });
@@ -435,7 +474,7 @@
         openModal("Withdraw", "Amount? (Min 50)", "50", (amt) => {
             if (balance < amt || amt < 50) { alert("❌ Invalid Amount"); return; }
             setTimeout(() => {
-                openModal("Number", "Bkash/Nagad Number", "017...", (num) => {
+                openModal("Number", "Bkash Number", "017...", (num) => {
                     db.ref("withdrawRequests").push({ userId: userId, amount: amt, accountNumber: num, status: "pending", time: Date.now() });
                     db.ref("users/" + userId + "/balance").set(balance - amt);
                     alert("✅ Request Sent!");

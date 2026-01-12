@@ -14,15 +14,15 @@
         .section.active { display: block; }
         .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .card h3 { margin: 0 0 10px 0; font-size: 16px; color: var(--secondary); border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #fff; }
         .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; margin: 5px 0; }
         .btn-add { background: var(--primary); }
         .btn-approve { background: var(--success); }
         .btn-reject { background: var(--danger); }
         .btn-delete { background: #64748b; font-size: 12px; }
         
-        .filter-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
-        .filter-btn { flex: 1; padding: 8px; border: none; border-radius: 5px; background: #e2e8f0; color: #475569; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .filter-tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .filter-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #e2e8f0; color: #475569; font-weight: bold; cursor: pointer; font-size: 12px; white-space: nowrap; }
         .filter-btn.active { background: var(--primary); color: white; }
 
         .flex-btns { display: flex; gap: 8px; }
@@ -36,9 +36,9 @@
         .nav-item i { font-size: 18px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
         
-        .player-row { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .winner-input-group { display: flex; gap: 5px; margin-top: 5px; }
-        .winner-input-group input { padding: 5px; margin: 0; }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        .player-item:last-child { border-bottom: none; }
+        .player-name { font-weight: 600; color: #334155; }
     </style>
 </head>
 <body>
@@ -60,7 +60,6 @@
             <input id="mLimit" type="number" placeholder="Join Limit (e.g. 48)">
             <label style="font-size: 12px; color: #64748b; margin-left: 5px;">Select Match Time:</label>
             <input id="mTime" type="datetime-local">
-            
             <button class="btn btn-add" onclick="addMatch()">Publish Match</button>
         </div>
         <div id="matchList"></div>
@@ -68,9 +67,10 @@
 
     <div id="win-sec" class="section">
         <div class="filter-tabs">
-            <button class="filter-btn active" onclick="switchWinTab('player-list', this)">Player List</button>
-            <button class="filter-btn" onclick="switchWinTab('winner-list', this)">Winner List</button>
+            <button id="tab-p-list" class="filter-btn active" onclick="switchWinTab('player-list')">Player List</button>
+            <button id="tab-w-list" class="filter-btn" onclick="switchWinTab('winner-list')">Winner List</button>
         </div>
+        
         <div id="player-list-area">
             <div class="card">
                 <h3>Select Match to See Players</h3>
@@ -78,10 +78,12 @@
                     <option value="">Select Match</option>
                 </select>
             </div>
-            <div id="joinedPlayers"></div>
+            <div id="joinedPlayers" class="card" style="padding:0;">
+                <p style="padding:20px; text-align:center; color:#94a3b8;">Select a match to load players</p>
+            </div>
         </div>
+
         <div id="winner-list-area" style="display:none">
-            <h2 style="font-size: 18px;">Winners History</h2>
             <div id="winnerList"></div>
         </div>
     </div>
@@ -136,46 +138,79 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
-        if(id === 'win-sec') updateMatchDropdown();
+        if(id === 'win-sec') { updateMatchDropdown(); loadWinners(); }
     }
 
-    // --- Deposit & Withdraw Filters (Fixed) ---
-    let currentDepFilter = 'pending';
-    function filterDep(status, el) {
-        currentDepFilter = status;
-        document.querySelectorAll('#dep-sec .filter-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        loadDeposits();
+    function switchWinTab(tab) {
+        document.getElementById('tab-p-list').classList.toggle('active', tab === 'player-list');
+        document.getElementById('tab-w-list').classList.toggle('active', tab === 'winner-list');
+        document.getElementById('player-list-area').style.display = (tab === 'player-list') ? 'block' : 'none';
+        document.getElementById('winner-list-area').style.display = (tab === 'winner-list') ? 'block' : 'none';
     }
 
-    let currentWithFilter = 'pending';
-    function filterWith(status, el) {
-        currentWithFilter = status;
-        document.querySelectorAll('#with-sec .filter-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        loadWithdrawals();
+    // --- Winner Management ---
+    function updateMatchDropdown() {
+        const select = document.getElementById('matchSelect');
+        db.ref('matches').once('value', snap => {
+            select.innerHTML = '<option value="">Select Match</option>';
+            snap.forEach(child => {
+                const m = child.val();
+                select.innerHTML += `<option value="${child.key}">${m.title}</option>`;
+            });
+        });
     }
 
-    // --- Matches ---
+    function loadPlayersForMatch(matchId) {
+        const list = document.getElementById('joinedPlayers');
+        if(!matchId) { list.innerHTML = '<p style="padding:20px; text-align:center; color:#94a3b8;">Select a match</p>'; return; }
+        
+        db.ref('matchPlayers/' + matchId).on('value', snap => {
+            list.innerHTML = '';
+            if(!snap.exists()) { list.innerHTML = '<p style="padding:20px; text-align:center;">No players</p>'; return; }
+            snap.forEach(child => {
+                const p = child.val();
+                list.innerHTML += `<div class="player-item">
+                    <span class="player-name">${p.gameName}</span>
+                    <button class="btn btn-add" style="width:auto; padding:5px 12px;" onclick="addAsWinner('${matchId}', '${child.key}', '${p.gameName}')">Win</button>
+                </div>`;
+            });
+        });
+    }
+
+    function addAsWinner(mId, uId, name) {
+        const prize = prompt(`Enter Prize for ${name}:`);
+        if(prize && !isNaN(prize)) {
+            db.ref('winners').push({ matchId: mId, userId: uId, userName: name, prize: Number(prize), time: Date.now() });
+            db.ref('users/' + uId + '/balance').transaction(c => (c || 0) + Number(prize));
+            alert("Winner Set!");
+        }
+    }
+
+    function loadWinners() {
+        db.ref('winners').on('value', snap => {
+            const list = document.getElementById('winnerList');
+            list.innerHTML = '<h3>History</h3>';
+            snap.forEach(child => {
+                const w = child.val();
+                list.innerHTML += `<div class="card" style="display:flex; justify-content:space-between;">
+                    <span><b>${w.userName}</b></span><span style="color:green">+৳${w.prize}</span>
+                </div>`;
+            });
+        });
+    }
+
+    // --- Match Control ---
     function addMatch() {
         const title = document.getElementById('mTitle').value;
         const time = document.getElementById('mTime').value;
-        if(!title || !time) return alert("Fill Title and Time");
-
+        if(!title || !time) return alert("Title/Time missing");
         db.ref('matches').push({
-            title: title, 
-            type: document.getElementById('mMode').value,
-            entryFee: document.getElementById('mEntry').value,
-            prize: document.getElementById('mPrize').value,
-            limit: document.getElementById('mLimit').value,
-            time: time,
-            game: "Free Fire",
-            roomId: "Waiting...", 
-            roomPass: "Waiting...", 
-            status: 'upcoming',
-            createdAt: firebase.database.ServerValue.TIMESTAMP
+            title: title, type: document.getElementById('mMode').value,
+            entryFee: document.getElementById('mEntry').value, prize: document.getElementById('mPrize').value,
+            limit: document.getElementById('mLimit').value, time: time,
+            roomId: "Waiting...", roomPass: "Waiting...", status: 'upcoming'
         });
-        alert("Published!");
+        alert("Match Published!");
     }
 
     db.ref('matches').on('value', snap => {
@@ -184,19 +219,26 @@
         snap.forEach(child => {
             const m = child.val();
             list.innerHTML += `<div class="card">
-                <h3>${m.title} (${m.type})</h3>
-                <p style="font-size:12px;color:#666">Time: ${m.time.replace('T',' ')} | Limit: ${m.limit}</p>
+                <h3>${m.title}</h3>
                 <div class="flex-btns">
                     <input id="ri-${child.key}" value="${m.roomId}">
                     <input id="rp-${child.key}" value="${m.roomPass}">
                 </div>
-                <button class="btn btn-add" onclick="updateRoom('${child.key}')">Update</button>
+                <button class="btn btn-add" onclick="updateRoom('${child.key}')">Update Room</button>
                 <button class="btn btn-delete" onclick="deleteMatch('${child.key}')">Delete</button>
             </div>`;
         });
     });
 
-    // --- Deposits (Fixed) ---
+    // --- Deposit (With Reject Fix) ---
+    let currentDepFilter = 'pending';
+    function filterDep(status, el) {
+        currentDepFilter = status;
+        document.querySelectorAll('#dep-sec .filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        loadDeposits();
+    }
+
     function loadDeposits() {
         db.ref('depositRequests').on('value', snap => {
             const list = document.getElementById('depositList');
@@ -205,16 +247,27 @@
                 const d = child.val();
                 if(d.status === currentDepFilter) {
                     list.innerHTML += `<div class="card">
-                        <b>User ID: ${d.userId.slice(-6)}</b> | Amount: ${d.amount}<br>
-                        TID: ${d.transactionId} <span class="status ${d.status}">${d.status}</span>
-                        ${d.status === 'pending' ? `<div class="flex-btns"><button class="btn btn-approve" onclick="approveDep('${child.key}','${d.userId}',${d.amount})">Approve</button></div>` : ''}
+                        <b>ID: ${d.userId.slice(-6)}</b> | ৳${d.amount} <span class="status ${d.status}">${d.status}</span><br>
+                        TID: ${d.transactionId}
+                        ${d.status === 'pending' ? `<div class="flex-btns">
+                            <button class="btn btn-approve" onclick="approveDep('${child.key}','${d.userId}',${d.amount})">Approve</button>
+                            <button class="btn btn-reject" onclick="updateStatus('depositRequests','${child.key}','rejected')">Reject</button>
+                        </div>` : ''}
                     </div>`;
                 }
             });
         });
     }
 
-    // --- Withdrawals (Fixed) ---
+    // --- Withdraw (With Reject Fix) ---
+    let currentWithFilter = 'pending';
+    function filterWith(status, el) {
+        currentWithFilter = status;
+        document.querySelectorAll('#with-sec .filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        loadWithdrawals();
+    }
+
     function loadWithdrawals() {
         db.ref('withdrawRequests').on('value', snap => {
             const list = document.getElementById('withdrawList');
@@ -223,18 +276,31 @@
                 const w = child.val();
                 if(w.status === currentWithFilter) {
                     list.innerHTML += `<div class="card">
-                        <b>User: ${w.userId.slice(-6)}</b> | Amount: ${w.amount} <span class="status ${w.status}">${w.status}</span>
-                        ${w.status === 'pending' ? `<div class="flex-btns"><button class="btn btn-approve" onclick="updateStatus('withdrawRequests','${child.key}','approved')">Approve</button></div>` : ''}
+                        <b>ID: ${w.userId.slice(-6)}</b> | ৳${w.amount} <span class="status ${w.status}">${w.status}</span><br>
+                        No: ${w.accountNumber}
+                        ${w.status === 'pending' ? `<div class="flex-btns">
+                            <button class="btn btn-approve" onclick="updateStatus('withdrawRequests','${child.key}','approved')">Approve</button>
+                            <button class="btn btn-reject" onclick="rejectWithdraw('${child.key}','${w.userId}',${w.amount})">Reject</button>
+                        </div>` : ''}
                     </div>`;
                 }
             });
         });
     }
 
+    // --- Utils & Bug Fixes ---
     function approveDep(id, uid, amt) {
         db.ref('depositRequests/'+id).update({status:'approved'});
         db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
     }
+    
+    function rejectWithdraw(id, uid, amt) {
+        // রিজেক্ট করলে ইউজারের টাকা ফেরত দিতে হবে
+        db.ref('withdrawRequests/'+id).update({status:'rejected'});
+        db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
+        alert("Withdraw Rejected & Refunded!");
+    }
+
     function updateStatus(path, id, status) { db.ref(`${path}/${id}`).update({ status: status }); }
     function deleteMatch(id) { if(confirm("Delete?")) db.ref('matches/'+id).remove(); }
     function updateRoom(id) {
@@ -242,9 +308,9 @@
             roomId: document.getElementById('ri-'+id).value,
             roomPass: document.getElementById('rp-'+id).value
         });
+        alert("Updated!");
     }
 
-    // Initial load
     loadDeposits();
     loadWithdrawals();
 </script>
