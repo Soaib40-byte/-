@@ -3,258 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Tournament App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>FFBS E-SPORTS - Premium Gaming Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --bg: #050b18;
-            --card-bg: rgba(255, 255, 255, 0.05);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
             --accent: #ff4757;
-            --text: #ffffff;
+            --dark-bg: #0b1120;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background: radial-gradient(circle at top, #1a2a6c, #b21f1f, #fdbb2d);
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 20%);
             background-attachment: fixed;
-            background-size: cover;
             font-family: 'Poppins', sans-serif;
-            color: var(--text);
+            color: #ffffff;
             margin: 0;
+            padding-bottom: 90px;
             overflow-x: hidden;
-            padding-bottom: 80px;
         }
 
-        .container { padding: 20px; max-width: 500px; margin: auto; }
+        .section-fade { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .container { padding: 20px; max-width: 480px; margin: auto; }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            background: rgba(11, 17, 32, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .balance-pill {
+            background: linear-gradient(135deg, #00b894, #00d2ff);
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9em;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
 
         .glass-card {
-            background: var(--card-bg);
+            background: var(--glass);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         #login-screen {
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-            height: 90vh;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             text-align: center;
+        }
+
+        .login-box i {
+            font-size: 5em;
+            background: linear-gradient(to bottom, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
         }
 
         .telegram-btn {
-            background: #0088cc;
+            background: linear-gradient(135deg, #0088cc, #00a2ed);
             color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
+            padding: 16px 32px;
+            border-radius: 16px;
             text-decoration: none;
-            font-weight: bold;
-            display: flex;
+            font-weight: 600;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             border: none;
             cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 136, 204, 0.4);
+            transition: 0.3s transform;
+        }
+
+        .telegram-btn:active { transform: scale(0.95); }
+
+        .game-banner {
+            position: relative;
+            height: 160px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            cursor: pointer;
             transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #161f32;
+        }
+
+        .game-banner img { width: 100%; height: 100%; object-fit: cover; }
+
+        .game-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5em;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .match-card {
-            position: relative;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-            border-radius: 15px;
-            margin-bottom: 20px;
+            background: #161f32;
+            border-radius: 20px;
+            margin-bottom: 25px;
             overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .match-banner {
-            height: 140px;
-            background: url('https://img.freepik.com/premium-photo/fire-background-gaming-banner_1029473-195973.jpg') center/cover;
+        .match-header {
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            padding: 15px;
             display: flex;
-            align-items: flex-end;
-            font-weight: bold;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-color: #1a202c;
         }
 
-        .banner-overlay {
-            background: rgba(0,0,0,0.6);
-            width: 100%;
-            padding: 10px 15px;
+        .match-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        .match-info { padding: 15px; }
+        .match-body { padding: 18px; }
 
-        .match-details { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            font-size: 0.9em; 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
-        .info-item { display: flex; align-items: center; gap: 8px; opacity: 0.9; }
-
-        .countdown-box {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px dashed rgba(255, 255, 255, 0.3);
+        .stat-box {
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
             border-radius: 12px;
-            padding: 10px;
             text-align: center;
-            color: #ffd700;
-            font-weight: bold;
-            margin: 15px 0;
-            font-size: 0.9em;
         }
 
-        .match-extra-buttons { display: flex; gap: 10px; margin-top: 5px; }
+        .stat-label { font-size: 0.75em; opacity: 0.6; display: block; margin-bottom: 4px; }
+        .stat-value { font-weight: 600; color: var(--primary); font-size: 0.95em; }
 
-        .extra-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
+        .timer-box {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+            padding: 8px;
             border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.15);
+            text-align: center;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border: 1px dashed rgba(255, 71, 87, 0.3);
         }
+
+        .progress-container { margin-bottom: 15px; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 5px; }
+        .progress-bar { height: 6px; background: #2d3748; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
 
         .btn-action {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             border: none;
-            border-radius: 0 0 15px 15px;
-            font-weight: bold;
-            text-transform: uppercase;
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            color: #0b1120;
+            font-weight: 700;
+            border-radius: 12px;
             cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-joined { background: #2d3748 !important; color: #718096 !important; cursor: not-allowed; }
+
+        .navbar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(22, 31, 50, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+
+        .nav-item {
+            color: #4a5568;
+            font-size: 1.4em;
+            padding: 10px 20px;
+            border-radius: 15px;
             transition: 0.3s;
         }
 
-        .btn-join { background: linear-gradient(to right, #00d2ff, #3a7bd5); color: white; }
-        .btn-joined { background: #4b4b4b !important; color: #aaa !important; cursor: not-allowed; }
-
-        .navbar {
-            position: fixed; bottom: 15px; left: 15px; right: 15px;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            display: flex; justify-content: space-around;
-            padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 100;
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(0, 242, 254, 0.1);
         }
-
-        .nav-item { color: #888; font-size: 1.2em; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
-
-        .hidden { display: none !important; }
 
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.8);
             display: flex; align-items: center; justify-content: center;
-            z-index: 2000;
-        }
-        .modal-input {
-            width: 100%; padding: 12px; margin: 15px 0;
-            border-radius: 10px; border: 1px solid #00d2ff;
-            background: rgba(255,255,255,0.1); color: white; outline: none;
-            box-sizing: border-box;
+            z-index: 3000; padding: 20px;
         }
 
-        .wallet-balance { font-size: 2em; font-weight: bold; color: #2ed573; margin: 10px 0; }
+        .modal-content {
+            background: #1a202c;
+            width: 100%;
+            max-width: 360px;
+            padding: 25px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: #2d3748;
+            border: 1px solid #4a5568;
+            padding: 12px;
+            border-radius: 12px;
+            color: white;
+            margin: 20px 0;
+            outline: none;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="login-screen" class="container">
-    <div class="glass-card">
-        <i class="fab fa-telegram-plane" style="font-size: 4em; color: #0088cc;"></i>
-        <h1>Welcome Back</h1>
-        <p>Login with Telegram to access matches</p>
+<div id="login-screen">
+    <div class="login-box section-fade">
+        <i class="fab fa-telegram-plane"></i>
+        <h1 style="font-family: 'Rajdhani'; font-size: 2.5em; margin: 0;">FFBS E-SPORTS</h1>
+        <p style="opacity: 0.6; margin-bottom: 30px;">Elevate your gaming experience</p>
         <button class="telegram-btn" onclick="login()">
-            <i class="fab fa-telegram"></i> Login with Telegram
+            <i class="fab fa-telegram"></i> Start Playing Now
         </button>
     </div>
 </div>
 
 <div id="app-ui" class="hidden">
-    <div id="home-sec" class="container">
-        <h2 style="display:flex; justify-content: space-between; align-items: center;">
-            Explore Games <span id="top-balance" style="font-size: 0.6em; background: #2ed573; padding: 5px 12px; border-radius: 20px;">৳ 0</span>
-        </h2>
-        <div class="match-card glass-card" onclick="showFFSection()" style="cursor: pointer;">
-            <div class="match-banner"><div class="banner-overlay">FREE FIRE MAX</div></div>
-            <div class="match-info">Matches Available</div>
-        </div>
-        <div class="match-card glass-card" style="opacity: 0.6;">
-            <div class="match-banner" style="filter: grayscale(1);"><div class="banner-overlay">BLOOD STRIKE</div></div>
-            <div class="match-info">Coming Soon...</div>
+    <div class="top-nav">
+        <div style="font-family: 'Rajdhani'; font-weight: 700; font-size: 1.2em;">FFBS E-SPORTS</div>
+        <div class="balance-pill">
+            <i class="fas fa-wallet"></i> <span id="top-balance">৳ 0</span>
         </div>
     </div>
 
-    <div id="ff-sec" class="container hidden">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-            <i class="fas fa-chevron-left" onclick="showHome()" style="cursor:pointer"></i>
-            <h3>BR - Solo Matches</h3>
+    <div id="home-sec" class="container section-fade">
+        <h3 style="margin-bottom: 20px; font-weight: 600;">Popular Games</h3>
+        <div class="game-banner" onclick="showFFSection('Free Fire')">
+            <img src="https://img.freepik.com/premium-photo/fire-background-gaming-banner_1029473-195973.jpg" alt="FF">
+            <div class="game-overlay">FREE FIRE MAX</div>
+        </div>
+        <div class="game-banner" onclick="showFFSection('Blood Strike')">
+            <img src="https://image-hosting.org/images/bloodstrike_banner.png" 
+                 onerror="this.src='https://images.wallpapersden.com/image/download/skull-warrior-gaming-art_bGxtZmuUmZqaraWkpJRmbmdlrWZmZ2U.jpg'" 
+                 alt="BS">
+            <div class="game-overlay">BLOOD STRIKE</div>
+        </div>
+    </div>
+
+    <div id="ff-sec" class="container hidden section-fade">
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px;">
+            <i class="fas fa-arrow-left" onclick="showHome()" style="cursor:pointer; font-size: 1.2em;"></i>
+            <h2 id="match-section-title" style="margin:0; font-family: 'Rajdhani';">MATCHES</h2>
         </div>
         <div id="matchContainer"></div>
     </div>
 
-    <div id="profile-sec" class="container hidden">
-        <div class="glass-card" style="text-align:center;">
-            <img src="https://ui-avatars.com/api/?name=User&background=00d2ff&color=fff" style="width:80px;border-radius:50%;border:3px solid var(--primary);">
-            <h2 id="u-name">Player</h2>
-            <p>@telegram_user</p>
-        </div>
-        <div style="display:flex;gap:15px;">
-            <div class="glass-card" style="flex:1;text-align:center;">
-                <p style="margin:0;font-size:0.9em;opacity:0.8;">Matches</p>
-                <h3 id="matches-count" style="margin:5px 0 0 0;">0</h3>
+    <div id="wallet-sec" class="container hidden section-fade">
+        <div class="glass-card" style="text-align:center; padding: 40px 20px;">
+            <p style="opacity: 0.6; margin: 0;">Total Balance</p>
+            <h1 style="font-size: 3em; margin: 10px 0; color: var(--primary);">৳ <span id="current-balance">0</span></h1>
+            <div style="display:flex; gap:12px; margin-top: 30px;">
+                <button class="telegram-btn" style="flex:1; background: #2ed573;" onclick="showAddMoney()">
+                    <i class="fas fa-plus-circle"></i> Deposit
+                </button>
+                <button class="telegram-btn" style="flex:1; background: #57606f;" onclick="handleWithdraw()">
+                    <i class="fas fa-paper-plane"></i> Withdraw
+                </button>
             </div>
-            <div class="glass-card" style="flex:1;text-align:center;">
-                <p style="margin:0;font-size:0.9em;opacity:0.8;">Earnings</p>
-                <h3 style="margin:5px 0 0 0;">৳ 0</h3>
+        </div>
+        <div id="add-money-list" class="hidden section-fade">
+            <h4 style="margin-left: 10px;">Deposit Method</h4>
+            <div class="glass-card" onclick="payVia('Bkash')" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-bottom: 10px;">
+                <span><i class="fas fa-mobile-alt" style="margin-right: 15px; color: #e91e63;"></i> Bkash Personal</span>
+                <i class="fas fa-chevron-right" style="opacity: 0.3;"></i>
             </div>
         </div>
     </div>
 
-    <div id="wallet-sec" class="container hidden">
+    <div id="profile-sec" class="container hidden section-fade">
         <div class="glass-card" style="text-align:center;">
-            <h3>My Wallet</h3>
-            <div class="wallet-balance">৳ <span id="current-balance">0</span></div>
-            <div style="display:flex;gap:10px;">
-                <button class="telegram-btn" style="flex:1;background:#2196f3;" onclick="showAddMoney()"><i class="fas fa-plus"></i> Add Money</button>
-                <button class="telegram-btn" style="flex:1;background:#4caf50;" onclick="handleWithdraw()"><i class="fas fa-university"></i> Withdraw</button>
+            <div style="position: relative; display: inline-block;">
+                <img src="https://ui-avatars.com/api/?name=User&background=00f2fe&color=0b1120&size=128" style="width:100px; border-radius:50%; border: 4px solid var(--primary); padding: 3px;">
+                <div style="position:absolute; bottom:5px; right:5px; background:#2ed573; width:20px; height:20px; border-radius:50%; border:3px solid #1a202c;"></div>
             </div>
+            <h2 id="u-name" style="margin: 15px 0 5px 0;">Elite Player</h2>
+            <p style="opacity:0.5; font-size:0.9em;">ID: <span id="display-uid"></span></p>
         </div>
-        <div id="add-money-list" class="hidden">
-            <h4>Select Method</h4>
-            <div class="glass-card" onclick="payVia('Bkash')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-                <span>Bkash Payment</span><i class="fas fa-chevron-right"></i>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div class="glass-card" style="text-align:center; margin:0;">
+                <p style="margin:0; font-size:0.8em; opacity:0.6;">Matches</p>
+                <h2 id="matches-count" style="margin:5px 0 0 0;">0</h2>
             </div>
-            <div class="glass-card" style="opacity:0.5;">Nagad (Coming Soon)</div>
+            <div class="glass-card" style="text-align:center; margin:0;">
+                <p style="margin:0; font-size:0.8em; opacity:0.6;">Rank</p>
+                <h2 style="margin:5px 0 0 0; color: #ffd700;">Pro</h2>
+            </div>
         </div>
     </div>
 
     <nav class="navbar">
-        <div class="nav-item active" id="n-home" onclick="showHome()"><i class="fas fa-home"></i></div>
+        <div class="nav-item active" id="n-home" onclick="showHome()"><i class="fas fa-th-large"></i></div>
         <div id="n-wallet" class="nav-item" onclick="showWallet()"><i class="fas fa-wallet"></i></div>
-        <div id="n-profile" class="nav-item" onclick="showProfile()"><i class="fas fa-user"></i></div>
+        <div id="n-profile" class="nav-item" onclick="showProfile()"><i class="fas fa-user-circle"></i></div>
     </nav>
 </div>
 
 <div id="custom-modal" class="modal-overlay hidden">
-    <div class="glass-card" style="width: 90%; max-width: 350px; text-align: center;">
-        <h3 id="modal-title">Title</h3>
-        <p id="modal-desc" style="font-size: 0.9em; opacity: 0.8;"></p>
+    <div class="modal-content section-fade">
+        <h3 id="modal-title" style="margin-top: 0;">Confirm Action</h3>
+        <p id="modal-desc" style="opacity: 0.7; font-size: 0.9em;"></p>
         <input type="text" id="modal-input" class="modal-input">
         <div style="display: flex; gap: 10px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:10px; border:none; background:#ff4757; color:white;">Cancel</button>
-            <button id="modal-confirm" style="flex:1; padding:12px; border-radius:10px; border:none; background:#2ed573; color:white;">Confirm</button>
+            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:12px; border:none; background:#2d3748; color:white; cursor:pointer;">Cancel</button>
+            <button id="modal-confirm" style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--primary); color:#0b1120; font-weight:700; cursor:pointer;">Confirm</button>
         </div>
     </div>
 </div>
@@ -280,6 +395,7 @@
     let mCount = 0;
     let userId = localStorage.getItem("uid") || ("uid_" + Date.now());
     localStorage.setItem("uid", userId);
+    document.getElementById('display-uid').innerText = userId.slice(-6).toUpperCase();
 
     function login() { localStorage.setItem('loggedIn', 'true'); checkAuth(); }
 
@@ -304,17 +420,21 @@
         document.getElementById('matches-count').innerText = mCount;
     }
 
-    // টাইম ফরম্যাট ফাংশন (AM/PM)
-    function formatTimeAMPM(timeStr) {
+    // তারিখ ও সময় দেখানোর নির্ভুল ফরম্যাট
+    function formatTime(timeStr) {
+        if(!timeStr) return "TBA";
         const date = new Date(timeStr);
-        return date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        if(isNaN(date.getTime())) return "TBA";
+        return date.toLocaleString('en-US', { day:'numeric', month:'short', hour:'numeric', minute:'numeric', hour12:true });
     }
 
-    // লাইভ টাইমার এবং ম্যাচ ইন্ড লজিক
-    function startLiveTimer(targetTime, elementId, btnId) {
+    // টাইম কাউন্টডাউন (যা তারিখ এবং সময় মিলিয়ে নিখুঁত হিসেব করবে)
+    function startLiveTimer(timeStr, elementId, btnId) {
+        const target = new Date(timeStr).getTime();
+        
         const x = setInterval(function() {
             const now = new Date().getTime();
-            const distance = new Date(targetTime).getTime() - now;
+            const distance = target - now;
             const display = document.getElementById(elementId);
             const btn = document.getElementById(btnId);
 
@@ -322,9 +442,9 @@
 
             if (distance < 0) {
                 clearInterval(x);
-                display.innerHTML = "MATCH STARTED";
+                display.innerHTML = "🔴 MATCH STARTED";
                 display.style.color = "#ff4757";
-                if (btn && btn.innerText !== "JOINED ✅") {
+                if (btn && btn.innerText !== "JOINED ✅" && btn.innerText !== "MATCH FULL") {
                     btn.innerText = "ENTRY CLOSED";
                     btn.disabled = true;
                     btn.classList.add('btn-joined');
@@ -334,136 +454,125 @@
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                display.innerHTML = `<i class="fas fa-clock"></i> Starts in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+                let timerText = days > 0 ? `${days}d ${hours}h ${minutes}m` : `${hours}h ${minutes}m ${seconds}s`;
+                display.innerHTML = `<i class="far fa-clock"></i> Starts in: ${timerText}`;
             }
         }, 1000);
     }
 
-    db.ref('matches').on('value', (snap) => {
-        const container = document.getElementById('matchContainer');
-        container.innerHTML = '';
-        snap.forEach((child) => {
-            const m = child.val();
-            const mId = child.key;
+    function showFFSection(gameType) {
+        hideAll();
+        document.getElementById('ff-sec').classList.remove('hidden');
+        document.getElementById('match-section-title').innerText = gameType.toUpperCase() + " BATTLES";
+        loadMatches(gameType);
+    }
 
-            if (m.game === "Free Fire") {
-                const card = document.createElement('div');
-                card.className = 'match-card glass-card';
-
-                // তারিখ এবং AM/PM সময় আলাদা করা
-                const datePart = m.time.split('T')[0];
-                const timePart = formatTimeAMPM(m.time);
-
-                card.innerHTML = `
-                    <div class="match-banner">
-                        <div class="banner-overlay">
-                            ${m.title}<br>
-                            <small style="font-size:0.7em; color:#00d2ff;"><i class="fas fa-calendar-alt"></i> ${datePart}, ${timePart}</small>
+    function loadMatches(selectedGame) {
+        db.ref('matches').on('value', (snap) => {
+            const container = document.getElementById('matchContainer');
+            container.innerHTML = '';
+            snap.forEach((child) => {
+                const m = child.val();
+                const mId = child.key;
+                if (m.game === selectedGame) {
+                    const card = document.createElement('div');
+                    card.className = 'match-card';
+                    const ffImg = "https://img.freepik.com/premium-photo/fire-background-gaming-banner_1029473-195973.jpg";
+                    const bsImg = "https://images.wallpapersden.com/image/download/skull-warrior-gaming-art_bGxtZmuUmZqaraWkpJRmbmdlrWZmZ2U.jpg";
+                    
+                    card.innerHTML = `
+                        <div class="match-header" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(22,31,50,1)), url('${m.game === 'Blood Strike' ? bsImg : ffImg}')">
+                            <div class="match-title">${m.title}</div>
+                            <div style="font-size: 0.8em; opacity: 0.8;"><i class="far fa-calendar"></i> ${formatTime(m.time)}</div>
                         </div>
-                    </div>
-                    <div class="match-info">
-                        <div class="match-details">
-                            <div class="info-item"><i class="fas fa-money-bill"></i> Entry: ৳${m.entryFee}</div>
-                            <div class="info-item"><i class="fas fa-trophy"></i> Prize: ৳${m.prize}</div>
-                            <div class="info-item"><i class="fas fa-gamepad"></i> Mode: ${m.type}</div>
-                            <div class="info-item" id="joined-count-${mId}"><i class="fas fa-users"></i> Joined: .../${m.limit || 48}</div>
+                        <div class="match-body">
+                            <div class="stats-grid">
+                                <div class="stat-box"><span class="stat-label">PRIZE</span><span class="stat-value">৳${m.prize}</span></div>
+                                <div class="stat-box"><span class="stat-label">ENTRY</span><span class="stat-value">৳${m.entryFee}</span></div>
+                                <div class="stat-box"><span class="stat-label">MODE</span><span class="stat-value">${m.type}</span></div>
+                                <div class="stat-box" id="jc-${mId}"><span class="stat-label">JOINED</span><span class="stat-value">0/${m.limit}</span></div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-text"><span id="sl-${mId}">${m.limit} Left</span><span id="pt-${mId}">0%</span></div>
+                                <div class="progress-bar"><div class="progress-fill" id="bar-${mId}"></div></div>
+                            </div>
+                            <div class="timer-box" id="timer-${mId}">Calculating...</div>
+                            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                                <button class="btn-action" style="background:#2d3748; color:white; font-size:0.8em;" onclick="showPlayers('${mId}')">Players</button>
+                                <button class="btn-action" style="background:#2d3748; color:white; font-size:0.8em;" onclick="showDetails('${mId}')">Room Info</button>
+                            </div>
+                            <button id="jb-${mId}" class="btn-action" onclick="handleJoin('${mId}', ${m.entryFee}, ${m.limit}, '${m.game}')">Join Tournament</button>
                         </div>
-                        <div class="match-extra-buttons">
-                            <button class="extra-btn" onclick="showDetails('${mId}')"><i class="fas fa-info-circle"></i> Details</button>
-                            <button class="extra-btn" onclick="showPlayers('${mId}')"><i class="fas fa-list"></i> Players</button>
-                        </div>
-                        <div class="countdown-box" id="timer-${mId}">Calculating time...</div>
-                    </div>
-                    <button id="join-btn-${mId}" class="btn-action btn-join" onclick="handleJoin('${mId}', ${m.entryFee}, ${m.limit || 48})">JOIN NOW</button>
-                `;
-                container.appendChild(card);
+                    `;
+                    container.appendChild(card);
 
-                // লাইভ প্লেয়ার কাউন্ট এবং লিমিট চেক
-                db.ref("matchPlayers/" + mId).on('value', pSnap => {
-                    const count = pSnap.numChildren();
-                    const limit = m.limit || 48;
-                    const el = document.getElementById(`joined-count-${mId}`);
-                    const btn = document.getElementById(`join-btn-${mId}`);
-
-                    if(el) el.innerHTML = `<i class="fas fa-users"></i> Joined: ${count}/${limit}`;
-
-                    // লিমিট শেষ হলে বাটন লক
-                    if (count >= limit && btn && btn.innerText !== "JOINED ✅") {
-                        btn.innerText = "MATCH FULL";
-                        btn.disabled = true;
-                        btn.classList.add('btn-joined');
-                    }
-                });
-
-                // টাইমার শুরু
-                startLiveTimer(m.time, `timer-${mId}`, `join-btn-${mId}`);
-
-                // জয়েন্ড স্ট্যাটাস রিয়েলটাইম চেক
-                db.ref("users/" + userId + "/joinedMatches/" + mId).on("value", (jSnap) => {
-                    if (jSnap.exists()) {
-                        const btn = document.getElementById("join-btn-" + mId);
-                        if (btn) { 
-                            btn.innerText = "JOINED ✅"; 
-                            btn.disabled = true; 
-                            btn.className = "btn-action btn-joined"; 
+                    db.ref("matchPlayers/"+mId).on('value', pSnap => {
+                        const count = pSnap.numChildren();
+                        const perc = (count/m.limit)*100;
+                        const jc = document.getElementById(`jc-${mId}`); if(jc) jc.querySelector('.stat-value').innerText = `${count}/${m.limit}`;
+                        const sl = document.getElementById(`sl-${mId}`); if(sl) sl.innerText = `${m.limit-count} Slots Left`;
+                        const pt = document.getElementById(`pt-${mId}`); if(pt) pt.innerText = `${Math.round(perc)}%`;
+                        const bar = document.getElementById(`bar-${mId}`); if(bar) bar.style.width = perc+"%";
+                        
+                        if(count >= m.limit) {
+                            const b = document.getElementById(`jb-${mId}`);
+                            if(b && b.innerText !== "JOINED ✅") { b.innerText="MATCH FULL"; b.disabled=true; b.className="btn-action btn-joined"; }
                         }
-                    }
-                });
-            }
+                    });
+
+                    startLiveTimer(m.time, `timer-${mId}`, `jb-${mId}`);
+
+                    db.ref("users/"+userId+"/joinedMatches/"+mId).on("value", jSnap => {
+                        if(jSnap.exists()) {
+                            const b = document.getElementById("jb-"+mId);
+                            if(b) { b.innerText="JOINED ✅"; b.disabled=true; b.className="btn-action btn-joined"; }
+                        }
+                    });
+                }
+            });
         });
-    });
+    }
 
-    function handleJoin(matchId, entryFee, limit) {
-        // জয়েন করার আগে সিট খালি আছে কিনা আবার চেক
-        db.ref("matchPlayers/" + matchId).once("value", pSnap => {
-            if (pSnap.numChildren() >= limit) {
-                alert("❌ দুঃখিত, ম্যাচটি ফুল হয়ে গেছে!");
-                return;
-            }
-
-            openModal("Join Match", "আপনার Free Fire ID দিন", "PlayerName", (ign) => {
-                if (!ign) return;
-                if (balance < entryFee) { alert("❌ পর্যাপ্ত ব্যালেন্স নেই"); return; }
-
-                db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", snap => {
-                    if (snap.exists()) { alert("⚠️ আপনি ইতিমধ্যে Join করেছেন"); return; }
-
-                    db.ref("users/" + userId + "/balance").set(balance - entryFee);
-                    db.ref("users/" + userId + "/joinedMatches/" + matchId).set({ ign: ign, time: Date.now() });
-                    db.ref("matchPlayers/" + matchId + "/" + userId).set({ gameName: ign, userId: userId });
-                    db.ref("users/" + userId + "/matches").transaction(c => (c || 0) + 1);
-                    alert("✅ Successfully Joined!");
-                });
+    function handleJoin(mId, fee, limit, game) {
+        if(balance < fee) return alert("❌ Insufficient Balance");
+        openModal("Registration", `Enter your ${game} IGN`, "Username", (ign) => {
+            db.ref("matchPlayers/"+mId).once("value", pSnap => {
+                if(pSnap.numChildren() >= limit) return alert("❌ Match Full");
+                db.ref("users/"+userId+"/balance").set(balance - fee);
+                db.ref("users/"+userId+"/joinedMatches/"+mId).set({ign: ign, time: Date.now()});
+                db.ref("matchPlayers/"+mId+"/"+userId).set({gameName: ign, userId: userId});
+                db.ref("users/"+userId+"/matches").transaction(c => (c||0)+1);
+                alert("✅ Joined Successfully!");
             });
         });
     }
 
     function openModal(title, desc, placeholder, callback) {
-        const modal = document.getElementById('custom-modal');
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-desc').innerText = desc;
-        const input = document.getElementById('modal-input');
-        input.placeholder = placeholder; input.value = "";
-        modal.classList.remove('hidden');
+        document.getElementById('modal-input').placeholder = placeholder;
+        document.getElementById('modal-input').value = "";
+        document.getElementById('custom-modal').classList.remove('hidden');
         document.getElementById('modal-confirm').onclick = () => {
-            if(input.value.trim() !== "") { callback(input.value); closeModal(); }
+            const val = document.getElementById('modal-input').value.trim();
+            if(val) { callback(val); closeModal(); }
         };
     }
 
     function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
     function showHome() { hideAll(); document.getElementById('home-sec').classList.remove('hidden'); setActiveNav('n-home'); }
-    function showFFSection() { hideAll(); document.getElementById('ff-sec').classList.remove('hidden'); }
     function showProfile() { hideAll(); document.getElementById('profile-sec').classList.remove('hidden'); setActiveNav('n-profile'); }
     function showWallet() { hideAll(); document.getElementById('wallet-sec').classList.remove('hidden'); setActiveNav('n-wallet'); }
-    function hideAll() { ['home-sec', 'ff-sec', 'profile-sec', 'wallet-sec'].forEach(s => document.getElementById(s).classList.add('hidden')); }
+    function hideAll() { ['home-sec','ff-sec','profile-sec','wallet-sec'].forEach(s => {const el=document.getElementById(s); if(el) el.classList.add('hidden');}); }
     function setActiveNav(id) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function showAddMoney() { document.getElementById('add-money-list').classList.remove('hidden'); }
+    function showAddMoney() { document.getElementById('add-money-list').classList.toggle('hidden'); }
 
     function payVia(method) {
-        openModal("Add Money", "কত টাকা পাঠাতে চান", "50", (amt) => {
+        openModal("Deposit", "Enter amount to add", "50", (amt) => {
             setTimeout(() => {
-                openModal("Transaction ID", method + " 01989118735 BEKASH এ টাকাপাঠিয়েTranjection ID দিন", "TRX123", (tid) => {
-                    db.ref("depositRequests").push({ userId: userId, method: method, amount: amt, transactionId: tid, status: "pending", time: Date.now() });
+                openModal("Verify", "Send money to 01989118735 and enter TRX ID", "TRX123", (tid) => {
+                    db.ref("depositRequests").push({userId:userId, method:method, amount:amt, transactionId:tid, status:"pending", time:Date.now()});
                     alert("✅ Request Sent!");
                 });
             }, 300);
@@ -471,35 +580,32 @@
     }
 
     function handleWithdraw() {
-        openModal("Withdraw", "Amount? (Min 50)", "50", (amt) => {
-            if (balance < amt || amt < 50) { alert("❌ Invalid Amount"); return; }
-            setTimeout(() => {
-                openModal("Number", "Bkash Number", "017...", (num) => {
-                    db.ref("withdrawRequests").push({ userId: userId, amount: amt, accountNumber: num, status: "pending", time: Date.now() });
-                    db.ref("users/" + userId + "/balance").set(balance - amt);
-                    alert("✅ Request Sent!");
-                });
-            }, 300);
+        openModal("Withdraw", "Enter amount (Min ৳50)", "50", (amt) => {
+            if(balance < amt || amt < 50) return alert("❌ Invalid Amount");
+            openModal("Account", "Enter Bkash Number", "017...", (num) => {
+                db.ref("withdrawRequests").push({userId:userId, amount:amt, accountNumber:num, status:"pending", time:Date.now()});
+                db.ref("users/"+userId+"/balance").set(balance - amt);
+                alert("✅ Request Sent!");
+            });
         });
     }
 
-    function showPlayers(matchId) {
-        db.ref("matchPlayers/" + matchId).once("value", (snap) => {
-            if (!snap.exists()) { alert("এখনো কেউ জয়েন করেনি!"); return; }
-            let list = "Players:\n";
-            snap.forEach((c) => { list += "- " + c.val().gameName + "\n"; });
+    function showPlayers(mId) {
+        db.ref("matchPlayers/"+mId).once("value", snap => {
+            if(!snap.exists()) return alert("No players yet");
+            let list = "Registered Players:\n";
+            snap.forEach(c => { list += "• " + c.val().gameName + "\n"; });
             alert(list);
         });
     }
 
-    function showDetails(matchId) {
-        db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", (jSnap) => {
-            if (jSnap.exists()) {
-                db.ref("matches/" + matchId).once("value", snap => {
-                    const m = snap.val();
-                    alert(`Room ID: ${m.roomId}\nPass: ${m.roomPass}`);
-                });
-            } else { alert("⚠️ জয়েন করুন আগে!"); }
+    function showDetails(mId) {
+        db.ref("users/"+userId+"/joinedMatches/"+mId).once("value", jSnap => {
+            if(!jSnap.exists()) return alert("⚠️ Please join the match first to see Room ID!");
+            db.ref("matches/"+mId).once("value", snap => {
+                const m = snap.val();
+                alert(`Room Details:\nRoom ID: ${m.roomId || 'Wait'}\nPassword: ${m.roomPass || 'Wait'}`);
+            });
         });
     }
 

@@ -206,19 +206,22 @@
     // --- Match Control ---
     function addMatch() {
         const title = document.getElementById('mTitle').value;
-        const time = document.getElementById('mTime').value;
+        const timeInput = document.getElementById('mTime').value;
         const game = document.getElementById('mGame').value;
         
-        if(!title || !time) return alert("Title/Time missing");
+        if(!title || !timeInput) return alert("Title/Time missing");
+
+        // সময়কে সঠিক কাউন্টডাউনের জন্য Timestamp (মিলিসেকেন্ড) এ রূপান্তর করা হয়েছে
+        const timestamp = new Date(timeInput).getTime();
 
         db.ref('matches').push({
             title: title,
-            game: game, // game ফিল্ড যোগ করা হয়েছে যাতে index.html এ দেখা যায়
+            game: game,
             type: document.getElementById('mMode').value,
-            entryFee: Number(document.getElementById('mEntry').value), // Number এ কনভার্ট করা হয়েছে
-            prize: Number(document.getElementById('mPrize').value), // Number এ কনভার্ট করা হয়েছে
+            entryFee: Number(document.getElementById('mEntry').value),
+            prize: Number(document.getElementById('mPrize').value),
             limit: Number(document.getElementById('mLimit').value) || 48,
-            time: time,
+            time: timestamp, // এখানে এখন টাইমস্ট্যাম্প সেভ হবে
             roomId: "Waiting...",
             roomPass: "Waiting...",
             status: 'upcoming'
@@ -228,6 +231,7 @@
             document.getElementById('mTitle').value = "";
             document.getElementById('mEntry').value = "";
             document.getElementById('mPrize').value = "";
+            document.getElementById('mTime').value = "";
         }).catch(err => alert("Error: " + err.message));
     }
 
