@@ -71,20 +71,60 @@
         }
 
         .match-banner {
-            height: 120px;
+            height: 140px;
             background: url('https://img.freepik.com/premium-photo/fire-background-gaming-banner_1029473-195973.jpg') center/cover;
             display: flex;
             align-items: flex-end;
-            padding: 10px;
             font-weight: bold;
         }
 
+        .banner-overlay {
+            background: rgba(0,0,0,0.6);
+            width: 100%;
+            padding: 10px 15px;
+        }
+
         .match-info { padding: 15px; }
-        .match-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em; opacity: 0.8; }
+        
+        .match-details { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            font-size: 0.9em; 
+        }
+
+        .info-item { display: flex; align-items: center; gap: 8px; opacity: 0.9; }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            color: #ffd700;
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+
+        .match-extra-buttons { display: flex; gap: 10px; margin-top: 5px; }
+
+        .extra-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
 
         .btn-action {
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             border: none;
             border-radius: 0 0 15px 15px;
             font-weight: bold;
@@ -112,7 +152,6 @@
 
         .hidden { display: none !important; }
 
-        /* Custom Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
@@ -126,35 +165,7 @@
             box-sizing: border-box;
         }
 
-        .timer-red { color: #ff4757; font-weight: bold; }
         .wallet-balance { font-size: 2em; font-weight: bold; color: #2ed573; margin: 10px 0; }
-   .match-extra-buttons{
-    display:flex;
-    gap:10px;
-    margin-top:12px;
-}
-
-.extra-btn{
-    flex:1;
-    padding:10px;
-    border:none;
-    border-radius:10px;
-    font-size:14px;
-    font-weight:bold;
-    cursor:pointer;
-    background:rgba(255,255,255,0.08);
-    color:#fff;
-    border:1px solid rgba(255,255,255,0.15);
-}
-
-.extra-btn i{
-    margin-right:6px;
-}
-
-.extra-btn:active{
-    transform:scale(0.97);
-}
-    
     </style>
 </head>
 <body>
@@ -171,82 +182,61 @@
 </div>
 
 <div id="app-ui" class="hidden">
-
     <div id="home-sec" class="container">
         <h2 style="display:flex; justify-content: space-between; align-items: center;">
             Explore Games <span id="top-balance" style="font-size: 0.6em; background: #2ed573; padding: 5px 12px; border-radius: 20px;">৳ 0</span>
         </h2>
         <div class="match-card glass-card" onclick="showFFSection()" style="cursor: pointer;">
-            <div class="match-banner">FREE FIRE MAX</div>
-            <div class="match-info">1 Matches Available</div>
+            <div class="match-banner"><div class="banner-overlay">FREE FIRE MAX</div></div>
+            <div class="match-info">Matches Available</div>
         </div>
         <div class="match-card glass-card" style="opacity: 0.6;">
-            <div class="match-banner" style="filter: grayscale(1);">BLOOD STRIKE</div>
+            <div class="match-banner" style="filter: grayscale(1);"><div class="banner-overlay">BLOOD STRIKE</div></div>
             <div class="match-info">Coming Soon...</div>
         </div>
     </div>
-<!-- FREE FIRE SECTION -->
-<div id="ff-sec" class="container hidden">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-        <i class="fas fa-chevron-left" onclick="showHome()"></i>
-        <h3>BR - Solo Matches</h3>
-    </div>
 
-    <div id="matchContainer"></div>
-</div>
-
-<!-- PROFILE SECTION -->
-<div id="profile-sec" class="container hidden">
-    <div class="glass-card" style="text-align:center;">
-        <img src="https://ui-avatars.com/api/?name=User&background=00d2ff&color=fff"
-             style="width:80px;border-radius:50%;border:3px solid var(--primary);">
-        <h2 id="u-name">Player One</h2>
-        <p>@telegram_user</p>
-    </div>
-
-    <div style="display:flex;gap:15px;">
-        <div class="glass-card" style="flex:1;text-align:center;">
-            <p style="margin:0;font-size:0.9em;opacity:0.8;">Matches</p>
-            <h3 id="matches-count" style="margin:5px 0 0 0;">0</h3>
+    <div id="ff-sec" class="container hidden">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+            <i class="fas fa-chevron-left" onclick="showHome()" style="cursor:pointer"></i>
+            <h3>BR - Solo Matches</h3>
         </div>
-        <div class="glass-card" style="flex:1;text-align:center;">
-            <p style="margin:0;font-size:0.9em;opacity:0.8;">Earnings</p>
-            <h3 style="margin:5px 0 0 0;">৳ 0</h3>
-        </div>
+        <div id="matchContainer"></div>
     </div>
-</div>
 
-<!-- WALLET SECTION -->
-<div id="wallet-sec" class="container hidden">
-    <div class="glass-card" style="text-align:center;">
-        <h3>My Wallet</h3>
-        <div class="wallet-balance">৳ <span id="current-balance">0</span></div>
-
-        <div style="display:flex;gap:10px;">
-            <button class="telegram-btn" style="flex:1;background:#2196f3;"
-                    onclick="showAddMoney()">
-                <i class="fas fa-plus"></i> Add Money
-            </button>
-            <button class="telegram-btn" style="flex:1;background:#4caf50;"
-                    onclick="handleWithdraw()">
-                <i class="fas fa-university"></i> Withdraw
-            </button>
+    <div id="profile-sec" class="container hidden">
+        <div class="glass-card" style="text-align:center;">
+            <img src="https://ui-avatars.com/api/?name=User&background=00d2ff&color=fff" style="width:80px;border-radius:50%;border:3px solid var(--primary);">
+            <h2 id="u-name">Player</h2>
+            <p>@telegram_user</p>
+        </div>
+        <div style="display:flex;gap:15px;">
+            <div class="glass-card" style="flex:1;text-align:center;">
+                <p style="margin:0;font-size:0.9em;opacity:0.8;">Matches</p>
+                <h3 id="matches-count" style="margin:5px 0 0 0;">0</h3>
+            </div>
+            <div class="glass-card" style="flex:1;text-align:center;">
+                <p style="margin:0;font-size:0.9em;opacity:0.8;">Earnings</p>
+                <h3 style="margin:5px 0 0 0;">৳ 0</h3>
+            </div>
         </div>
     </div>
 
-    <div id="add-money-list" class="hidden">
-        <h4>Select Method</h4>
-        <div class="glass-card"
-             onclick="payVia('Bkash')"
-             style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-            <span>Bkash Payment</span>
-            <i class="fas fa-chevron-right"></i>
+    <div id="wallet-sec" class="container hidden">
+        <div class="glass-card" style="text-align:center;">
+            <h3>My Wallet</h3>
+            <div class="wallet-balance">৳ <span id="current-balance">0</span></div>
+            <div style="display:flex;gap:10px;">
+                <button class="telegram-btn" style="flex:1;background:#2196f3;" onclick="showAddMoney()"><i class="fas fa-plus"></i> Add Money</button>
+                <button class="telegram-btn" style="flex:1;background:#4caf50;" onclick="handleWithdraw()"><i class="fas fa-university"></i> Withdraw</button>
+            </div>
         </div>
-        <div class="glass-card" style="opacity:0.5;">Nagad (Coming Soon)</div>
-    </div>
-</div>
-
-            <div class="glass-card" style="opacity: 0.5;">Nagad (Coming Soon)</div>
+        <div id="add-money-list" class="hidden">
+            <h4>Select Method</h4>
+            <div class="glass-card" onclick="payVia('Bkash')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                <span>Bkash Payment</span><i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="glass-card" style="opacity:0.5;">Nagad (Coming Soon)</div>
         </div>
     </div>
 
@@ -268,63 +258,145 @@
         </div>
     </div>
 </div>
-<!-- Firebase SDKs -->
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDgBrES-3lWjeFVo6vz3jfMOyCl_tgy_RQ",
-    authDomain: "tournament-hub-a936a.firebaseapp.com",
-    databaseURL: "https://tournament-hub-a936a-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "tournament-hub-a936a",
-    storageBucket: "tournament-hub-a936a.appspot.com",
-    messagingSenderId: "968072956918",
-    appId: "1:968072956918:web:fee6b8c7cfdf1f77c115d7"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDgBrES-3lWjeFVo6vz3jfMOyCl_tgy_RQ",
+        authDomain: "tournament-hub-a936a.firebaseapp.com",
+        databaseURL: "https://tournament-hub-a936a-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tournament-hub-a936a",
+        storageBucket: "tournament-hub-a936a.appspot.com",
+        messagingSenderId: "968072956918",
+        appId: "1:968072956918:web:fee6b8c7cfdf1f77c115d7"
+    };
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  // Realtime Database reference
-  const db = firebase.database();
-</script>
-    <script>
     let balance = 0;
-    let joined = false;
     let mCount = 0;
-let userId = localStorage.getItem("uid"); if (!userId) {     userId = "uid_" + Date.now();     localStorage.setItem("uid", userId); }
+    let userId = localStorage.getItem("uid") || ("uid_" + Date.now());
+    localStorage.setItem("uid", userId);
 
-
-    function login() {
-        localStorage.setItem('loggedIn', 'true');
-        checkAuth();
-    }
+    function login() { localStorage.setItem('loggedIn', 'true'); checkAuth(); }
 
     function checkAuth() {
         if(localStorage.getItem('loggedIn')) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-ui').classList.remove('hidden');
-            db.ref("users/" + userId + "/balance").once("value", snap => {
-    if (snap.val() === null) {
-        db.ref("users/" + userId + "/balance").set(0);
-    }
-});
-            db.ref("users/" + userId + "/balance").on("value", snapshot => {
-    balance = snapshot.val() || 0;
-
-});
-
-
-db.ref("users/" + userId + "/matches").on("value", function(snapshot){
-    mCount = snapshot.val() || 0;
-    updateUI();
-});
-db.ref("users/" + userId + "/joined").once("value", function(snap){
-    joined = snap.val() || false;
-});
-            
-            updateUI();
+            db.ref("users/" + userId + "/balance").on("value", snap => {
+                balance = snap.val() || 0;
+                updateUI();
+            });
+            db.ref("users/" + userId + "/matches").on("value", snap => {
+                mCount = snap.val() || 0;
+                updateUI();
+            });
         }
+    }
+
+    function updateUI() {
+        document.getElementById('current-balance').innerText = balance;
+        document.getElementById('top-balance').innerText = "৳ " + balance;
+        document.getElementById('matches-count').innerText = mCount;
+    }
+
+    // Live Timer Function
+    function startLiveTimer(targetTime, elementId) {
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = new Date(targetTime).getTime() - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const display = document.getElementById(elementId);
+            if (!display) { clearInterval(x); return; }
+
+            if (distance < 0) {
+                clearInterval(x);
+                display.innerHTML = "MATCH STARTED";
+            } else {
+                display.innerHTML = `<i class="fas fa-clock"></i> Format: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+        }, 1000);
+    }
+
+    db.ref('matches').on('value', (snap) => {
+        const container = document.getElementById('matchContainer');
+        container.innerHTML = '';
+        snap.forEach((child) => {
+            const m = child.val();
+            const mId = child.key;
+
+            if (m.game === "Free Fire") {
+                const card = document.createElement('div');
+                card.className = 'match-card glass-card';
+                card.innerHTML = `
+                    <div class="match-banner">
+                        <div class="banner-overlay">
+                            ${m.title}<br>
+                            <small style="font-size:0.7em; color:#00d2ff;"><i class="fas fa-calendar-alt"></i> ${m.time.replace('T', ', ')}</small>
+                        </div>
+                    </div>
+                    <div class="match-info">
+                        <div class="match-details">
+                            <div class="info-item"><i class="fas fa-money-bill"></i> Entry: ৳${m.entryFee}</div>
+                            <div class="info-item"><i class="fas fa-trophy"></i> Prize: ৳${m.prize}</div>
+                            <div class="info-item"><i class="fas fa-gamepad"></i> Mode: ${m.type}</div>
+                            <div class="info-item" id="joined-count-${mId}"><i class="fas fa-users"></i> Joined: 0/${m.limit || 48}</div>
+                        </div>
+                        <div class="match-extra-buttons">
+                            <button class="extra-btn" onclick="showDetails('${mId}')"><i class="fas fa-info-circle"></i> Details</button>
+                            <button class="extra-btn" onclick="showPlayers('${mId}')"><i class="fas fa-list"></i> Players</button>
+                        </div>
+                        <div class="countdown-box" id="timer-${mId}">Calculating time...</div>
+                    </div>
+                    <button id="join-btn-${mId}" class="btn-action btn-join" onclick="handleJoin('${mId}', ${m.entryFee})">JOIN NOW</button>
+                `;
+                container.appendChild(card);
+
+                // Live Joined Count
+                db.ref("matchPlayers/" + mId).on('value', pSnap => {
+                    const count = pSnap.numChildren();
+                    const el = document.getElementById(`joined-count-${mId}`);
+                    if(el) el.innerHTML = `<i class="fas fa-users"></i> Joined: ${count}/${m.limit || 48}`;
+                });
+
+                // Start Timer
+                startLiveTimer(m.time, `timer-${mId}`);
+
+                // Check Joined Status
+                db.ref("users/" + userId + "/joinedMatches/" + mId).once("value", (jSnap) => {
+                    if (jSnap.exists()) {
+                        const btn = document.getElementById("join-btn-" + mId);
+                        if (btn) { btn.innerText = "JOINED ✅"; btn.disabled = true; btn.className = "btn-action btn-joined"; }
+                    }
+                });
+            }
+        });
+    });
+
+    function handleJoin(matchId, entryFee) {
+        openModal("Join Match", "আপনার Free Fire ID দিন", "PlayerName", (ign) => {
+            if (!ign) return;
+            if (balance < entryFee) { alert("❌ পর্যাপ্ত ব্যালেন্স নেই"); return; }
+
+            db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", snap => {
+                if (snap.exists()) { alert("⚠️ আপনি ইতিমধ্যে Join করেছেন"); return; }
+
+                db.ref("users/" + userId + "/balance").set(balance - entryFee);
+                db.ref("users/" + userId + "/joinedMatches/" + matchId).set({ ign: ign, time: Date.now() });
+                db.ref("matchPlayers/" + matchId + "/" + userId).set({ gameName: ign, userId: userId });
+                db.ref("users/" + userId + "/matches").transaction(c => (c || 0) + 1);
+                alert("✅ Successfully Joined!");
+            });
+        });
     }
 
     function openModal(title, desc, placeholder, callback) {
@@ -332,278 +404,67 @@ db.ref("users/" + userId + "/joined").once("value", function(snap){
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-desc').innerText = desc;
         const input = document.getElementById('modal-input');
-        input.placeholder = placeholder;
-        input.value = "";
+        input.placeholder = placeholder; input.value = "";
         modal.classList.remove('hidden');
-
         document.getElementById('modal-confirm').onclick = () => {
-            let val = input.value;
-            if(val.trim() !== "") {
-                callback(val);
-                closeModal();
-            }
+            if(input.value.trim() !== "") { callback(input.value); closeModal(); }
         };
     }
 
     function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
-
     function showHome() { hideAll(); document.getElementById('home-sec').classList.remove('hidden'); setActiveNav('n-home'); }
     function showFFSection() { hideAll(); document.getElementById('ff-sec').classList.remove('hidden'); }
     function showProfile() { hideAll(); document.getElementById('profile-sec').classList.remove('hidden'); setActiveNav('n-profile'); }
     function showWallet() { hideAll(); document.getElementById('wallet-sec').classList.remove('hidden'); setActiveNav('n-wallet'); }
-    function hideAll() {
-        ['home-sec', 'ff-sec', 'profile-sec', 'wallet-sec'].forEach(s => document.getElementById(s).classList.add('hidden'));
-        document.getElementById('add-money-list').classList.add('hidden');
-    }
-    function setActiveNav(id) {
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
+    function hideAll() { ['home-sec', 'ff-sec', 'profile-sec', 'wallet-sec'].forEach(s => document.getElementById(s).classList.add('hidden')); }
+    function setActiveNav(id) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); }
     function showAddMoney() { document.getElementById('add-money-list').classList.remove('hidden'); }
-
-
-function payVia(method) {
-
-    // STEP 1: Ask Amount
-    openModal(
-        "Add Money",
-        "আপনি কত টাকা Add করতে চান?",
-        "50",
-        (amountInput) => {
-
-            const amount = Number(amountInput);
-
-            if (!amount || amount < 10) {
-                alert("❌ সঠিক Amount দিন (কমপক্ষে ১০ টাকা)");
-                return;
-            }
-
-            // 🔴 IMPORTANT: close first modal manually
-            closeModal();
-
-            // STEP 2: Ask Transaction ID (delay দিয়ে)
+    
+    function payVia(method) {
+        openModal("Add Money", "কত টাকা পাঠিয়েছেন?", "50", (amt) => {
             setTimeout(() => {
-                openModal(
-                    `${method} Payment`,
-                    `${method} 01989118735 এই নাম্বারে ${amount} টাকা পাঠিয়ে Transaction ID দিন`,
-                    "Transaction ID লিখুন",
-                    (tid) => {
-
-                        db.ref("depositRequests").push({
-                            userId: userId,
-                            method: method,
-                            amount: amount,
-                            transactionId: tid,
-                            status: "pending",
-                            time: Date.now()
-                        });
-
-                        alert("✅ Add Money Request Admin এর কাছে পাঠানো হয়েছে");
-                    }
-                );
+                openModal("Transaction ID", method + " Transaction ID দিন", "TRX123", (tid) => {
+                    db.ref("depositRequests").push({ userId: userId, method: method, amount: amt, transactionId: tid, status: "pending", time: Date.now() });
+                    alert("✅ Request Sent!");
+                });
             }, 300);
-        }
-    );
-}
-function handleJoin(matchId, entryFee) {
-
-    openModal(
-        "Join Match",
-        "আপনার Free Fire ID দিন",
-        "PlayerName",
-        (ign) => {
-
-            if (!ign || ign.trim() === "") {
-                alert("এখানে আপনার গেম আইডির নাম দিন");
-                return;
-            }
-
-            closeModal();
-
-            if (balance < entryFee) {
-                alert("❌ পর্যাপ্ত ব্যালেন্স নেই");
-                return;
-            }
-
-            // 🔒 single & correct check
-            db.ref("users/" + userId + "/joinedMatches/" + matchId)
-              .once("value", snap => {
-
-                  if (snap.exists()) {
-                      alert("⚠️ আপনি ইতিমধ্যে এই ম্যাচে Join করেছেন");
-                      return;
-                  }
-
-                  // ✅ balance cut
-                  db.ref("users/" + userId + "/balance")
-                    .set(balance - entryFee);
-
-                  // ✅ save join
-                  db.ref("users/" + userId + "/joinedMatches/" + matchId)
-                    .set({
-                        ign: ign,
-                        time: Date.now()
-                    });
-                    // ৪৪৭ নম্বর লাইনের ঠিক পরে এটি যোগ করুন
-db.ref("matchPlayers/" + matchId + "/" + userId).set({
-    gameName: ign, 
-    userId: userId
-});
-
-db.ref("users/" + userId + "/matches")
-  .transaction(count => (count || 0) + 1);
-                  updateUI();
-
-                  const btn = document.getElementById("join-btn-" + matchId);
-                  if (btn) {
-                      btn.innerText = "JOINED ✅";
-                      btn.disabled = true;
-                      btn.className = "btn-action btn-joined";
-                  }
-              });
-        }
-    );
-}
-    function handleWithdraw() {
-    // উইথড্র করার অ্যামাউন্ট জানার জন্য প্রথম পপআপ
-    openModal(
-        "Withdraw Money",
-        "আপনি কত টাকা Withdraw করতে চান? (কমপক্ষে ৫০ টাকা)",
-        "50",
-        (amountInput) => {
-            const amount = Number(amountInput);
-
-            // ইনপুট চেক
-            if (!amount || amount < 50) {
-                alert("❌ সঠিক Amount দিন (কমপক্ষে ৫০ টাকা)");
-                return;
-            }
-            if (balance < amount) {
-                alert("❌ আপনার পর্যাপ্ত ব্যালেন্স নেই");
-                return;
-            }
-
-            closeModal();
-
-            // নাম্বার নেওয়ার জন্য দ্বিতীয় পপআপ (৩০০ মিলিসেকেন্ড দেরি করে আসবে যাতে আগেরটা ঠিকঠাক বন্ধ হয়)
-            setTimeout(() => {
-                openModal(
-                    "Withdraw Request",
-                    "আপনার Bkash/Nagad নাম্বারটি দিন",
-                    "017XXXXXXXX",
-                    (accountNumber) => {
-                        // ডাটাবেসে রিকোয়েস্ট সেভ করা
-                        db.ref("withdrawRequests").push({
-                            userId: userId,
-                            amount: amount,
-                            accountNumber: accountNumber,
-                            status: "pending",
-                            time: Date.now()
-                        });
-
-                        // ইউজারের বর্তমান ব্যালেন্স থেকে টাকা কমিয়ে দেওয়া
-                        db.ref("users/" + userId + "/balance").set(balance - amount);
-
-                        alert("✅ Withdraw রিকোয়েস্ট পাঠানো হয়েছে। এডমিন চেক করে পেমেন্ট করে দিবে।");
-                    }
-                );
-            }, 300);
-        }
-    );
-}
-
-    function updateUI() {
-    document.getElementById('current-balance').innerText = balance;
-    document.getElementById('top-balance').innerText = "৳ " + balance;
-    document.getElementById('matches-count').innerText = mCount;
-}
-
-// Firebase থেকে ম্যাচগুলো নিয়ে আসা এবং UI-তে দেখানো
-db.ref('matches').on('value', (snap) => {
-    const container = document.getElementById('matchContainer');
-    container.innerHTML = ''; // আগের ডাটা ক্লিয়ার করা
-
-    snap.forEach((child) => {
-        const m = child.val();
-        const mId = child.key;
-
-        // শুধুমাত্র Free Fire গেমের ম্যাচগুলো দেখাবে
-        if (m.game === "Free Fire") {
-            const card = document.createElement('div');
-            card.className = 'match-card glass-card';
-            
-            card.innerHTML = `
-                <div class="match-banner">${m.title}</div>
-                <div class="match-info">
-                    <div class="match-details">
-                        <span><i class="fas fa-money-bill"></i> Entry: ৳${m.entryFee}</span>
-                        <span><i class="fas fa-trophy"></i> Prize: ৳${m.prize}</span>
-                        <span><i class="fas fa-gamepad"></i> Mode: ${m.type}</span>
-                        <span><i class="fas fa-clock"></i> ${m.time}</span>
-                    </div>
-                    <div class="match-extra-buttons">
-<button class="extra-btn" onclick="showDetails('${mId}')"><i class="fas fa-info-circle"></i> Details</button>
-                        <button class="extra-btn" onclick="showPlayers('${mId}')"><i class="fas fa-list"></i> Players</button>
-
-                    </div>
-                </div>
-                <button id="join-btn-${mId}" 
-                    class="btn-action btn-join" 
-                    onclick="handleJoin('${mId}', ${m.entryFee})">
-                    JOIN NOW
-                </button>
-            `;
-            container.appendChild(card);
-
-            // ইউজার কি ইতিমধ্যে জয়েন করেছে কিনা চেক করা
-            db.ref("users/" + userId + "/joinedMatches/" + mId).once("value", (jSnap) => {
-                if (jSnap.exists()) {
-                    const btn = document.getElementById("join-btn-" + mId);
-                    if (btn) {
-                        btn.innerText = "JOINED ✅";
-                        btn.disabled = true;
-                        btn.className = "btn-action btn-joined";
-                    }
-                }
-            });
-        }
-    });
-});
-function showPlayers(matchId) {
-    db.ref("matchPlayers/" + matchId).once("value", (snap) => {
-        if (!snap.exists()) {
-            alert("এখনো কেউ জয়েন করেনি!");
-            return;
-        }
-        
-        let playerList = "জয়েন করা প্লেয়ারদের তালিকা:\n";
-        let count = 1;
-        snap.forEach((child) => {
-            playerList += count + ". " + child.val().gameName + "\n";
-            count++;
         });
-        alert(playerList);
-    });
-}
-function showDetails(matchId) {
-    db.ref("matches/" + matchId).once("value", (snap) => {
-        const m = snap.val();
-        
-        // ইউজার এই ম্যাচে জয়েন করেছে কিনা চেক করা (নিরাপত্তার জন্য)
+    }
+
+    function handleWithdraw() {
+        openModal("Withdraw", "Amount? (Min 50)", "50", (amt) => {
+            if (balance < amt || amt < 50) { alert("❌ Invalid Amount"); return; }
+            setTimeout(() => {
+                openModal("Number", "Bkash/Nagad Number", "017...", (num) => {
+                    db.ref("withdrawRequests").push({ userId: userId, amount: amt, accountNumber: num, status: "pending", time: Date.now() });
+                    db.ref("users/" + userId + "/balance").set(balance - amt);
+                    alert("✅ Request Sent!");
+                });
+            }, 300);
+        });
+    }
+
+    function showPlayers(matchId) {
+        db.ref("matchPlayers/" + matchId).once("value", (snap) => {
+            if (!snap.exists()) { alert("এখনো কেউ জয়েন করেনি!"); return; }
+            let list = "Players:\n";
+            snap.forEach((c) => { list += "- " + c.val().gameName + "\n"; });
+            alert(list);
+        });
+    }
+
+    function showDetails(matchId) {
         db.ref("users/" + userId + "/joinedMatches/" + matchId).once("value", (jSnap) => {
             if (jSnap.exists()) {
-                alert(`Match Details:\n\nRoom ID: ${m.roomId}\nPassword: ${m.roomPass}`);
-            } else {
-                alert("⚠️ রুম আইডি দেখতে আগে ম্যাচে জয়েন করুন!");
-            }
+                db.ref("matches/" + matchId).once("value", snap => {
+                    const m = snap.val();
+                    alert(`Room ID: ${m.roomId}\nPass: ${m.roomPass}`);
+                });
+            } else { alert("⚠️ জয়েন করুন আগে!"); }
         });
-    });
-}
+    }
 
-    
     window.onload = checkAuth;
-
 </script>
 </body>
 </html>

@@ -58,7 +58,9 @@
             <input id="mEntry" type="number" placeholder="Entry Fee">
             <input id="mPrize" type="number" placeholder="Total Prize">
             <input id="mLimit" type="number" placeholder="Join Limit (e.g. 48)">
-            <input id="mTime" placeholder="Time (30/01/26, 12:00AM)">
+            <label style="font-size: 12px; color: #64748b; margin-left: 5px;">Select Match Time:</label>
+            <input id="mTime" type="datetime-local">
+            
             <button class="btn btn-add" onclick="addMatch()">Publish Match</button>
         </div>
         <div id="matchList"></div>
@@ -69,7 +71,6 @@
             <button class="filter-btn active" onclick="switchWinTab('player-list', this)">Player List</button>
             <button class="filter-btn" onclick="switchWinTab('winner-list', this)">Winner List</button>
         </div>
-
         <div id="player-list-area">
             <div class="card">
                 <h3>Select Match to See Players</h3>
@@ -79,7 +80,6 @@
             </div>
             <div id="joinedPlayers"></div>
         </div>
-
         <div id="winner-list-area" style="display:none">
             <h2 style="font-size: 18px;">Winners History</h2>
             <div id="winnerList"></div>
@@ -139,102 +139,8 @@
         if(id === 'win-sec') updateMatchDropdown();
     }
 
-    function switchWinTab(target, el) {
-        document.querySelectorAll('#win-sec .filter-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        if(target === 'player-list') {
-            document.getElementById('player-list-area').style.display = 'block';
-            document.getElementById('winner-list-area').style.display = 'none';
-        } else {
-            document.getElementById('player-list-area').style.display = 'none';
-            document.getElementById('winner-list-area').style.display = 'block';
-            loadWinners();
-        }
-    }
-
-    function updateMatchDropdown() {
-        const select = document.getElementById('matchSelect');
-        db.ref('matches').once('value', snap => {
-            select.innerHTML = '<option value="">Select Match</option>';
-            snap.forEach(child => {
-                select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`;
-            });
-        });
-    }
-
-    function loadPlayersForMatch(matchId) {
-        if(!matchId) return;
-        const listDiv = document.getElementById('joinedPlayers');
-        listDiv.innerHTML = '<p style="text-align:center">Loading players...</p>';
-
-        db.ref(`matchPlayers/${matchId}`).on('value', snap => {
-            listDiv.innerHTML = '';
-            if(!snap.exists()) {
-                listDiv.innerHTML = '<div class="card">No players joined yet.</div>';
-                return;
-            }
-            snap.forEach(child => {
-                const p = child.val();
-                listDiv.innerHTML += `
-                    <div class="card player-row">
-                        <div style="display:flex; justify-content:space-between">
-                            <b>${p.gameName}</b>
-                            <span style="font-size:12px; color:#666">ID: ${p.userId.slice(-5)}</span>
-                        </div>
-                        <div class="winner-input-group">
-                            <select id="rank-${child.key}" style="width:70px">
-                                <option value="1">1st</option>
-                                <option value="2">2nd</option>
-                                <option value="3">3rd</option>
-                            </select>
-                            <input type="number" id="prize-${child.key}" placeholder="Prize" style="flex:1">
-                            <button class="btn btn-approve" style="width:80px; margin:0" 
-                                onclick="setWinner('${matchId}', '${child.key}', '${p.userId}', '${p.gameName}')">Set</button>
-                        </div>
-                    </div>`;
-            });
-        });
-    }
-
-    function setWinner(matchId, playerKey, userId, gameName) {
-        const rank = document.getElementById(`rank-${playerKey}`).value;
-        const amount = document.getElementById(`prize-${playerKey}`).value;
-        if(!amount) return alert("Please enter prize amount");
-
-        const winData = {
-            matchId: matchId,
-            userId: userId,
-            gameName: gameName,
-            rank: rank,
-            prize: Number(amount),
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        db.ref('winners').push(winData).then(() => {
-            db.ref(`users/${userId}/balance`).transaction(curr => (curr || 0) + Number(amount));
-            alert(`Rank ${rank} Winner Updated! Balance added.`);
-        });
-    }
-
-    function loadWinners() {
-        db.ref('winners').on('value', snap => {
-            const list = document.getElementById('winnerList');
-            list.innerHTML = '';
-            let items = [];
-            snap.forEach(c => items.push(c.val()));
-            items.reverse().forEach(w => {
-                list.innerHTML += `
-                    <div class="card" style="border-left: 4px solid var(--success)">
-                        <b>${w.gameName}</b> - <span class="status approved">${w.rank} Rank</span>
-                        <p style="margin:5px 0 0 0">Won: ৳${w.prize} | UserID: ${w.userId.slice(-6)}</p>
-                    </div>`;
-            });
-        });
-    }
-
+    // --- Deposit & Withdraw Filters (Fixed) ---
     let currentDepFilter = 'pending';
-    let currentWithFilter = 'pending';
-
     function filterDep(status, el) {
         currentDepFilter = status;
         document.querySelectorAll('#dep-sec .filter-btn').forEach(b => b.classList.remove('active'));
@@ -242,30 +148,7 @@
         loadDeposits();
     }
 
-    function loadDeposits() {
-        db.ref('depositRequests').on('value', snap => {
-            const list = document.getElementById('depositList');
-            list.innerHTML = '';
-            let items = [];
-            snap.forEach(child => {
-                const d = child.val();
-                if(d.status === currentDepFilter) items.push({key: child.key, ...d});
-            });
-            items.reverse().forEach(d => {
-                list.innerHTML += `
-                    <div class="card">
-                        <b>User: ${d.userId.slice(-6)}</b> | ৳${d.amount} <span class="status ${d.status}">${d.status}</span><br>
-                        TID: ${d.transactionId}
-                        ${d.status === 'pending' ? `
-                        <div class="flex-btns" style="margin-top:10px">
-                            <button class="btn btn-approve" onclick="approveDep('${d.key}','${d.userId}',${d.amount})">Approve</button>
-                            <button class="btn btn-reject" onclick="updateStatus('depositRequests', '${d.key}', 'rejected')">Reject</button>
-                        </div>` : ''}
-                    </div>`;
-            });
-        });
-    }
-
+    let currentWithFilter = 'pending';
     function filterWith(status, el) {
         currentWithFilter = status;
         document.querySelectorAll('#with-sec .filter-btn').forEach(b => b.classList.remove('active'));
@@ -273,82 +156,86 @@
         loadWithdrawals();
     }
 
-    function loadWithdrawals() {
-        db.ref('withdrawRequests').on('value', snap => {
-            const list = document.getElementById('withdrawList');
-            list.innerHTML = '';
-            let items = [];
-            snap.forEach(child => {
-                const w = child.val();
-                if(w.status === currentWithFilter) items.push({key: child.key, ...w});
-            });
-            items.reverse().forEach(w => {
-                list.innerHTML += `
-                    <div class="card">
-                        <div style="display:flex; justify-content:space-between">
-                            <b>User: ${w.userId.slice(-6)}</b>
-                            <span class="status ${w.status}">${w.status}</span>
-                        </div>
-                        <p>Amount: ৳${w.amount}</p>
-                        ${w.status === 'pending' ? `
-                        <div class="flex-btns">
-                            <button class="btn btn-approve" onclick="updateStatus('withdrawRequests', '${w.key}', 'approved')">Approve</button>
-                            <button class="btn btn-reject" onclick="rejectWith('${w.key}','${w.userId}',${w.amount})">Reject & Refund</button>
-                        </div>` : ''}
-                    </div>`;
-            });
-        });
-    }
-
-    function updateStatus(path, id, status) { db.ref(`${path}/${id}`).update({ status: status }); }
-    function approveDep(id, uid, amt) {
-        db.ref('depositRequests/'+id).update({status:'approved'});
-        db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
-    }
-    function rejectWith(id, uid, amt) {
-        db.ref('withdrawRequests/'+id).update({status:'rejected'});
-        db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
-    }
-
+    // --- Matches ---
     function addMatch() {
         const title = document.getElementById('mTitle').value;
-        const limit = document.getElementById('mLimit').value;
-        if(!title || !limit) return alert("Title and Limit required");
+        const time = document.getElementById('mTime').value;
+        if(!title || !time) return alert("Fill Title and Time");
+
         db.ref('matches').push({
             title: title, 
             type: document.getElementById('mMode').value,
             entryFee: document.getElementById('mEntry').value,
             prize: document.getElementById('mPrize').value,
-            limit: Number(limit), // Added Limit
-            time: document.getElementById('mTime').value,
+            limit: document.getElementById('mLimit').value,
+            time: time,
             game: "Free Fire",
             roomId: "Waiting...", 
             roomPass: "Waiting...", 
             status: 'upcoming',
             createdAt: firebase.database.ServerValue.TIMESTAMP
         });
-        alert("Match Published!");
+        alert("Published!");
     }
 
     db.ref('matches').on('value', snap => {
         const list = document.getElementById('matchList');
         list.innerHTML = '';
-        let items = [];
-        snap.forEach(child => { items.push({key: child.key, ...child.val()}); });
-        items.reverse().forEach(m => {
-            list.innerHTML += `
-                <div class="card">
-                    <h3>${m.title} (${m.limit} Players)</h3>
-                    <div class="flex-btns">
-                        <input id="ri-${m.key}" value="${m.roomId}" placeholder="Room ID">
-                        <input id="rp-${m.key}" value="${m.roomPass}" placeholder="Pass">
-                    </div>
-                    <button class="btn btn-add" onclick="updateRoom('${m.key}')">Update Room</button>
-                    <button class="btn btn-delete" onclick="deleteMatch('${m.key}')">Delete Match</button>
-                </div>`;
+        snap.forEach(child => {
+            const m = child.val();
+            list.innerHTML += `<div class="card">
+                <h3>${m.title} (${m.type})</h3>
+                <p style="font-size:12px;color:#666">Time: ${m.time.replace('T',' ')} | Limit: ${m.limit}</p>
+                <div class="flex-btns">
+                    <input id="ri-${child.key}" value="${m.roomId}">
+                    <input id="rp-${child.key}" value="${m.roomPass}">
+                </div>
+                <button class="btn btn-add" onclick="updateRoom('${child.key}')">Update</button>
+                <button class="btn btn-delete" onclick="deleteMatch('${child.key}')">Delete</button>
+            </div>`;
         });
     });
 
+    // --- Deposits (Fixed) ---
+    function loadDeposits() {
+        db.ref('depositRequests').on('value', snap => {
+            const list = document.getElementById('depositList');
+            list.innerHTML = '';
+            snap.forEach(child => {
+                const d = child.val();
+                if(d.status === currentDepFilter) {
+                    list.innerHTML += `<div class="card">
+                        <b>User ID: ${d.userId.slice(-6)}</b> | Amount: ${d.amount}<br>
+                        TID: ${d.transactionId} <span class="status ${d.status}">${d.status}</span>
+                        ${d.status === 'pending' ? `<div class="flex-btns"><button class="btn btn-approve" onclick="approveDep('${child.key}','${d.userId}',${d.amount})">Approve</button></div>` : ''}
+                    </div>`;
+                }
+            });
+        });
+    }
+
+    // --- Withdrawals (Fixed) ---
+    function loadWithdrawals() {
+        db.ref('withdrawRequests').on('value', snap => {
+            const list = document.getElementById('withdrawList');
+            list.innerHTML = '';
+            snap.forEach(child => {
+                const w = child.val();
+                if(w.status === currentWithFilter) {
+                    list.innerHTML += `<div class="card">
+                        <b>User: ${w.userId.slice(-6)}</b> | Amount: ${w.amount} <span class="status ${w.status}">${w.status}</span>
+                        ${w.status === 'pending' ? `<div class="flex-btns"><button class="btn btn-approve" onclick="updateStatus('withdrawRequests','${child.key}','approved')">Approve</button></div>` : ''}
+                    </div>`;
+                }
+            });
+        });
+    }
+
+    function approveDep(id, uid, amt) {
+        db.ref('depositRequests/'+id).update({status:'approved'});
+        db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
+    }
+    function updateStatus(path, id, status) { db.ref(`${path}/${id}`).update({ status: status }); }
     function deleteMatch(id) { if(confirm("Delete?")) db.ref('matches/'+id).remove(); }
     function updateRoom(id) {
         db.ref('matches/'+id).update({
@@ -357,6 +244,7 @@
         });
     }
 
+    // Initial load
     loadDeposits();
     loadWithdrawals();
 </script>
