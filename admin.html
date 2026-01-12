@@ -49,6 +49,10 @@
     <div id="match-sec" class="section active">
         <div class="card">
             <h3>Create Match</h3>
+            <select id="mGame">
+                <option value="Free Fire">Free Fire</option>
+                <option value="Blood Strike">Blood Strike</option>
+            </select>
             <input id="mTitle" placeholder="Match Title">
             <select id="mMode">
                 <option value="Solo">Solo</option>
@@ -203,14 +207,28 @@
     function addMatch() {
         const title = document.getElementById('mTitle').value;
         const time = document.getElementById('mTime').value;
+        const game = document.getElementById('mGame').value;
+        
         if(!title || !time) return alert("Title/Time missing");
+
         db.ref('matches').push({
-            title: title, type: document.getElementById('mMode').value,
-            entryFee: document.getElementById('mEntry').value, prize: document.getElementById('mPrize').value,
-            limit: document.getElementById('mLimit').value, time: time,
-            roomId: "Waiting...", roomPass: "Waiting...", status: 'upcoming'
-        });
-        alert("Match Published!");
+            title: title,
+            game: game, // game ফিল্ড যোগ করা হয়েছে যাতে index.html এ দেখা যায়
+            type: document.getElementById('mMode').value,
+            entryFee: Number(document.getElementById('mEntry').value), // Number এ কনভার্ট করা হয়েছে
+            prize: Number(document.getElementById('mPrize').value), // Number এ কনভার্ট করা হয়েছে
+            limit: Number(document.getElementById('mLimit').value) || 48,
+            time: time,
+            roomId: "Waiting...",
+            roomPass: "Waiting...",
+            status: 'upcoming'
+        }).then(() => {
+            alert("Match Published!");
+            // ইনপুট বক্স খালি করা
+            document.getElementById('mTitle').value = "";
+            document.getElementById('mEntry').value = "";
+            document.getElementById('mPrize').value = "";
+        }).catch(err => alert("Error: " + err.message));
     }
 
     db.ref('matches').on('value', snap => {
@@ -219,10 +237,10 @@
         snap.forEach(child => {
             const m = child.val();
             list.innerHTML += `<div class="card">
-                <h3>${m.title}</h3>
+                <h3>${m.title} (${m.game})</h3>
                 <div class="flex-btns">
-                    <input id="ri-${child.key}" value="${m.roomId}">
-                    <input id="rp-${child.key}" value="${m.roomPass}">
+                    <input id="ri-${child.key}" value="${m.roomId}" placeholder="Room ID">
+                    <input id="rp-${child.key}" value="${m.roomPass}" placeholder="Password">
                 </div>
                 <button class="btn btn-add" onclick="updateRoom('${child.key}')">Update Room</button>
                 <button class="btn btn-delete" onclick="deleteMatch('${child.key}')">Delete</button>
@@ -230,7 +248,7 @@
         });
     });
 
-    // --- Deposit (With Reject Fix) ---
+    // --- Deposit ---
     let currentDepFilter = 'pending';
     function filterDep(status, el) {
         currentDepFilter = status;
@@ -259,7 +277,7 @@
         });
     }
 
-    // --- Withdraw (With Reject Fix) ---
+    // --- Withdraw ---
     let currentWithFilter = 'pending';
     function filterWith(status, el) {
         currentWithFilter = status;
@@ -292,23 +310,28 @@
     function approveDep(id, uid, amt) {
         db.ref('depositRequests/'+id).update({status:'approved'});
         db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
+        alert("Deposit Approved!");
     }
     
     function rejectWithdraw(id, uid, amt) {
-        // রিজেক্ট করলে ইউজারের টাকা ফেরত দিতে হবে
         db.ref('withdrawRequests/'+id).update({status:'rejected'});
         db.ref('users/'+uid+'/balance').transaction(b => (b||0) + Number(amt));
         alert("Withdraw Rejected & Refunded!");
     }
 
-    function updateStatus(path, id, status) { db.ref(`${path}/${id}`).update({ status: status }); }
-    function deleteMatch(id) { if(confirm("Delete?")) db.ref('matches/'+id).remove(); }
+    function updateStatus(path, id, status) { 
+        db.ref(`${path}/${id}`).update({ status: status }); 
+        alert("Status Updated to " + status);
+    }
+
+    function deleteMatch(id) { if(confirm("Are you sure you want to delete this match?")) db.ref('matches/'+id).remove(); }
+
     function updateRoom(id) {
         db.ref('matches/'+id).update({
             roomId: document.getElementById('ri-'+id).value,
             roomPass: document.getElementById('rp-'+id).value
         });
-        alert("Updated!");
+        alert("Room Details Updated!");
     }
 
     loadDeposits();

@@ -85,7 +85,7 @@
         }
 
         .match-info { padding: 15px; }
-        
+
         .match-details { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -349,7 +349,7 @@
             if (m.game === "Free Fire") {
                 const card = document.createElement('div');
                 card.className = 'match-card glass-card';
-                
+
                 // তারিখ এবং AM/PM সময় আলাদা করা
                 const datePart = m.time.split('T')[0];
                 const timePart = formatTimeAMPM(m.time);
@@ -384,9 +384,9 @@
                     const limit = m.limit || 48;
                     const el = document.getElementById(`joined-count-${mId}`);
                     const btn = document.getElementById(`join-btn-${mId}`);
-                    
+
                     if(el) el.innerHTML = `<i class="fas fa-users"></i> Joined: ${count}/${limit}`;
-                    
+
                     // লিমিট শেষ হলে বাটন লক
                     if (count >= limit && btn && btn.innerText !== "JOINED ✅") {
                         btn.innerText = "MATCH FULL";
@@ -458,7 +458,7 @@
     function hideAll() { ['home-sec', 'ff-sec', 'profile-sec', 'wallet-sec'].forEach(s => document.getElementById(s).classList.add('hidden')); }
     function setActiveNav(id) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); }
     function showAddMoney() { document.getElementById('add-money-list').classList.remove('hidden'); }
-    
+
     function payVia(method) {
         openModal("Add Money", "কত টাকা পাঠাতে চান", "50", (amt) => {
             setTimeout(() => {
