@@ -459,7 +459,54 @@ db.ref("users/" + userId + "/matches")
         }
     );
 }
-    
+    function handleWithdraw() {
+    // উইথড্র করার অ্যামাউন্ট জানার জন্য প্রথম পপআপ
+    openModal(
+        "Withdraw Money",
+        "আপনি কত টাকা Withdraw করতে চান? (কমপক্ষে ৫০ টাকা)",
+        "50",
+        (amountInput) => {
+            const amount = Number(amountInput);
+
+            // ইনপুট চেক
+            if (!amount || amount < 50) {
+                alert("❌ সঠিক Amount দিন (কমপক্ষে ৫০ টাকা)");
+                return;
+            }
+            if (balance < amount) {
+                alert("❌ আপনার পর্যাপ্ত ব্যালেন্স নেই");
+                return;
+            }
+
+            closeModal();
+
+            // নাম্বার নেওয়ার জন্য দ্বিতীয় পপআপ (৩০০ মিলিসেকেন্ড দেরি করে আসবে যাতে আগেরটা ঠিকঠাক বন্ধ হয়)
+            setTimeout(() => {
+                openModal(
+                    "Withdraw Request",
+                    "আপনার Bkash/Nagad নাম্বারটি দিন",
+                    "017XXXXXXXX",
+                    (accountNumber) => {
+                        // ডাটাবেসে রিকোয়েস্ট সেভ করা
+                        db.ref("withdrawRequests").push({
+                            userId: userId,
+                            amount: amount,
+                            accountNumber: accountNumber,
+                            status: "pending",
+                            time: Date.now()
+                        });
+
+                        // ইউজারের বর্তমান ব্যালেন্স থেকে টাকা কমিয়ে দেওয়া
+                        db.ref("users/" + userId + "/balance").set(balance - amount);
+
+                        alert("✅ Withdraw রিকোয়েস্ট পাঠানো হয়েছে। এডমিন চেক করে পেমেন্ট করে দিবে।");
+                    }
+                );
+            }, 300);
+        }
+    );
+}
+
     function updateUI() {
     document.getElementById('current-balance').innerText = balance;
     document.getElementById('top-balance').innerText = "৳ " + balance;
