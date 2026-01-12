@@ -415,7 +415,7 @@ function handleJoin(matchId, entryFee) {
         (ign) => {
 
             if (!ign || ign.trim() === "") {
-                alert("❌ নাম/ID দিতে হবে");
+                alert("এখানে আপনার গেম আইডির নাম দিন");
                 return;
             }
 
@@ -445,6 +445,12 @@ function handleJoin(matchId, entryFee) {
                         ign: ign,
                         time: Date.now()
                     });
+                    // ৪৪৭ নম্বর লাইনের ঠিক পরে এটি যোগ করুন
+db.ref("matchPlayers/" + matchId + "/" + userId).set({
+    gameName: ign, 
+    userId: userId
+});
+
 db.ref("users/" + userId + "/matches")
   .transaction(count => (count || 0) + 1);
                   updateUI();
@@ -538,7 +544,8 @@ db.ref('matches').on('value', (snap) => {
                     </div>
                     <div class="match-extra-buttons">
                         <button class="extra-btn"><i class="fas fa-info-circle"></i> Details</button>
-                        <button class="extra-btn"><i class="fas fa-list"></i> Players</button>
+                        <<button class="extra-btn" onclick="showPlayers('${mId}')"><i class="fas fa-list"></i> Players</button>
+
                     </div>
                 </div>
                 <button id="join-btn-${mId}" 
@@ -563,6 +570,22 @@ db.ref('matches').on('value', (snap) => {
         }
     });
 });
+function showPlayers(matchId) {
+    db.ref("matchPlayers/" + matchId).once("value", (snap) => {
+        if (!snap.exists()) {
+            alert("এখনো কেউ জয়েন করেনি!");
+            return;
+        }
+        
+        let playerList = "জয়েন করা প্লেয়ারদের তালিকা:\n";
+        let count = 1;
+        snap.forEach((child) => {
+            playerList += count + ". " + child.val().gameName + "\n";
+            count++;
+        });
+        alert(playerList);
+    });
+}
 
     
     window.onload = checkAuth;
