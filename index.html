@@ -580,15 +580,42 @@
     }
 
     function handleWithdraw() {
-        openModal("Withdraw", "Enter amount (Min ৳50)", "50", (amt) => {
-            if(balance < amt || amt < 50) return alert("❌ Invalid Amount");
+    openModal("Withdraw", "Enter amount (Min ৳50)", "50", (amtVal) => {
+        const amt = Number(amtVal); // স্ট্রিং থেকে নাম্বারে রূপান্তর
+        
+        if (isNaN(amt) || amt < 50) {
+            return alert("❌ Please enter a valid amount (Minimum 50)");
+        }
+        
+        if (balance < amt) {
+            return alert("❌ Insufficient Balance. Your balance: ৳" + balance);
+        }
+
+        // একটু বিরতি দিয়ে দ্বিতীয় মডাল খুলুন যাতে ইভেন্ট কনফ্লিক্ট না হয়
+        setTimeout(() => {
             openModal("Account", "Enter Bkash Number", "017...", (num) => {
-                db.ref("withdrawRequests").push({userId:userId, amount:amt, accountNumber:num, status:"pending", time:Date.now()});
-                db.ref("users/"+userId+"/balance").set(balance - amt);
-                alert("✅ Request Sent!");
+                if(num.length < 11) return alert("❌ Invalid Bkash Number");
+
+                // ডাটাবেসে রিকোয়েস্ট পাঠানো
+                db.ref("withdrawRequests").push({
+                    userId: userId,
+                    amount: amt,
+                    accountNumber: num,
+                    status: "pending",
+                    time: Date.now()
+                }).then(() => {
+                    // ব্যালেন্স আপডেট
+                    return db.ref("users/" + userId + "/balance").set(balance - amt);
+                }).then(() => {
+                    alert("✅ Withdraw Request Sent Successfully!");
+                }).catch((err) => {
+                    alert("❌ Error: " + err.message);
+                });
             });
-        });
-    }
+        }, 500);
+    });
+}
+
 
     function showPlayers(mId) {
         db.ref("matchPlayers/"+mId).once("value", snap => {
