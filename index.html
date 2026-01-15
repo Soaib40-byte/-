@@ -421,6 +421,13 @@
         document.getElementById('top-balance').innerText = "৳ " + balance;
         document.getElementById('matches-count').innerText = mCount;
     }
+function formatTime(timestamp) {
+    if(!timestamp) return "TBA";
+    // টাইমস্ট্যাম্পকে সংখ্যায় রূপান্তর করে ডেট অবজেক্ট তৈরি
+    const date = new Date(Number(timestamp)); 
+    if(isNaN(date.getTime())) return "TBA";
+    return date.toLocaleString('en-US', { day:'numeric', month:'short', hour:'numeric', minute:'numeric', hour12:true });
+}
 
     function formatTime(timeStr) {
         if(!timeStr) return "TBA";
@@ -430,30 +437,39 @@
     }
 
     function startLiveTimer(timeStr, elementId, btnId) {
-        const target = new Date(timeStr).getTime();
-        const x = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = target - now;
-            const display = document.getElementById(elementId);
-            const btn = document.getElementById(btnId);
-            if (!display) { clearInterval(x); return; }
-            if (distance < 0) {
-                clearInterval(x);
-                display.innerHTML = "🔴 MATCH STARTED";
-                if (btn && btn.innerText !== "JOINED ✅" && btn.innerText !== "MATCH FULL") {
-                    btn.innerText = "ENTRY CLOSED";
-                    btn.disabled = true;
-                    btn.classList.add('btn-joined');
-                }
-            } else {
-                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((distance % (1000 * 60)) / 1000);
-                display.innerHTML = `<i class="far fa-clock"></i> Starts in: ${h}h ${m}m ${s}s`;
-            }
-        }, 1000);
-    }
+    // এডমিন প্যানেল থেকে আসা টাইমস্ট্যাম্পকে সংখ্যায় রূপান্তর
+    const target = Number(timeStr); 
+    
+    const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = target - now;
+        const display = document.getElementById(elementId);
+        const btn = document.getElementById(btnId);
 
+        if (!display) { clearInterval(x); return; }
+
+        if (distance < 0) {
+            clearInterval(x);
+            display.innerHTML = "🔴 MATCH STARTED";
+            // ম্যাচ শুরু হয়ে গেলে জয়েন বাটন বন্ধ করা
+            if (btn && btn.innerText !== "JOINED ✅" && btn.innerText !== "MATCH FULL") {
+                btn.innerText = "ENTRY CLOSED";
+                btn.disabled = true;
+                btn.classList.add('btn-joined');
+            }
+        } else {
+            // দিন, ঘণ্টা, মিনিট এবং সেকেন্ড গণনা
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            // যদি ১ দিনের বেশি সময় থাকে তবে দিন দেখাবে, নাহলে শুধু সময়
+            let timeText = (d > 0) ? `${d}d ${h}h ${m}m ${s}s` : `${h}h ${m}m ${s}s`;
+            display.innerHTML = `<i class="far fa-clock"></i> Starts in: ${timeText}`;
+        }
+    }, 1000);
+}
     function showFFSection(gameType) {
         hideAll();
         document.getElementById('ff-sec').classList.remove('hidden');
